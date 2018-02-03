@@ -1,0 +1,14 @@
+CREATE OR REPLACE FORCE VIEW SYS_LOG_VIEW AS
+SELECT	case when HASH is not null and HASH=GenerateHMAC('hash'||USER_ID||TIME||SOURCE||ACTION||CONTENT||SYS_LOG.RESULT||IP||MAC) then 'TRUE' else 'FALSE' end VERIFY,
+        ID,
+        (select LOGIN_NAME from SYS_USER where ID=SYS_LOG.USER_ID) USER_LOGIN_NAME,
+		TIME,
+		SOURCE,
+		(select DICT_NAME from CFG_DICT where DICT_TYPE=1028 and DICT_CODE=SYS_LOG.ACTION) ACTION,
+		CONTENT,
+		case when 0=RESULT then 'Ê§°Ü' else '³É¹¦' end RESULT,
+		IP,
+		MAC,
+		HASH
+FROM SYS_LOG
+ORDER BY ID;

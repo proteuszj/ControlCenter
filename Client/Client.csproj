@@ -1,0 +1,480 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9F1A8348-EF5A-4C4F-B8AA-45D52FFB76B0}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Management</RootNamespace>
+    <AssemblyName>Management</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="libzkfpcsharp, Version=1.0.0.1, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Finger\libzkfpcsharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.122.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AboutBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutBox.Designer.cs">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Algo.cs" />
+    <Compile Include="ConfigParameters.cs" />
+    <Compile Include="Connected Services\TMRIOutAccess\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="DBM.cs" />
+    <Compile Include="Finger\BitmapFormat.cs" />
+    <Compile Include="Form_Audit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Audit.Designer.cs">
+      <DependentUpon>Form_Audit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Booking.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Booking.Designer.cs">
+      <DependentUpon>Form_Booking.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_BookingStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_BookingStatus.Designer.cs">
+      <DependentUpon>Form_BookingStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_CarAllocation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_CarAllocation.Designer.cs">
+      <DependentUpon>Form_CarAllocation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_CarInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_CarInfo.Designer.cs">
+      <DependentUpon>Form_CarInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_CarInfo_appendModify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_CarInfo_appendModify.Designer.cs">
+      <DependentUpon>Form_CarInfo_appendModify.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Config.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Config.Designer.cs">
+      <DependentUpon>Form_Config.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_DeviceInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_DeviceInfo.Designer.cs">
+      <DependentUpon>Form_DeviceInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_DeviceInfo_appendModify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_DeviceInfo_appendModify.Designer.cs">
+      <DependentUpon>Form_DeviceInfo_appendModify.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_ExaminerInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_ExaminerInfo.Designer.cs">
+      <DependentUpon>Form_ExaminerInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_ExaminerInfo_appendModify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_ExaminerInfo_appendModify.Designer.cs">
+      <DependentUpon>Form_ExaminerInfo_appendModify.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_ExamStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_ExamStatus.Designer.cs">
+      <DependentUpon>Form_ExamStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Grouping.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Grouping.Designer.cs">
+      <DependentUpon>Form_Grouping.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_LogQuery.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_LogQuery.Designer.cs">
+      <DependentUpon>Form_LogQuery.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Password.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Password.Designer.cs">
+      <DependentUpon>Form_Password.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_PaymentDetail.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_PaymentDetail.Designer.cs">
+      <DependentUpon>Form_PaymentDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_PricingStrategy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_PricingStrategy.Designer.cs">
+      <DependentUpon>Form_PricingStrategy.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Permission.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Permission.Designer.cs">
+      <DependentUpon>Form_Permission.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_PlaceInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_PlaceInfo.Designer.cs">
+      <DependentUpon>Form_PlaceInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_PlaceInfo_appendModify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_PlaceInfo_appendModify.Designer.cs">
+      <DependentUpon>Form_PlaceInfo_appendModify.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_SchoolInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_SchoolInfo.Designer.cs">
+      <DependentUpon>Form_SchoolInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_SchoolInfo_appendModify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_SchoolInfo_appendModify.Designer.cs">
+      <DependentUpon>Form_SchoolInfo_appendModify.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Score.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Score.Designer.cs">
+      <DependentUpon>Form_Score.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Process.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Process.Designer.cs">
+      <DependentUpon>Form_Process.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_StudentExam.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_StudentExam.Designer.cs">
+      <DependentUpon>Form_StudentExam.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Student_appendModify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Student_appendModify.Designer.cs">
+      <DependentUpon>Form_Student_appendModify.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_SummaryQuery.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_SummaryQuery.Designer.cs">
+      <DependentUpon>Form_SummaryQuery.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_SummaryStatistices.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_SummaryStatistices.Designer.cs">
+      <DependentUpon>Form_SummaryStatistices.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_TrainBooking.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_TrainBooking.Designer.cs">
+      <DependentUpon>Form_TrainBooking.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_TrainBooking_confirm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_TrainBooking_confirm.Designer.cs">
+      <DependentUpon>Form_TrainBooking_confirm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_User.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_User.Designer.cs">
+      <DependentUpon>Form_User.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Help.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Help.Designer.cs">
+      <DependentUpon>Form_Help.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Main.Designer.cs">
+      <DependentUpon>Form_Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_DBConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_DBConfig.Designer.cs">
+      <DependentUpon>Form_DBConfig.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_User_appendModify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_User_appendModify.Designer.cs">
+      <DependentUpon>Form_User_appendModify.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IDReader\PotevioIDReader.cs" />
+    <Compile Include="IniFile.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="TMRI\TMRIException.cs" />
+    <Compile Include="TMRI\TMRIQuery.cs" />
+    <Compile Include="TMRI\TMRIWrite.cs" />
+    <Compile Include="Utils.cs" />
+    <EmbeddedResource Include="AboutBox.resx">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Audit.resx">
+      <DependentUpon>Form_Audit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Booking.resx">
+      <DependentUpon>Form_Booking.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_BookingStatus.resx">
+      <DependentUpon>Form_BookingStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_CarAllocation.resx">
+      <DependentUpon>Form_CarAllocation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_CarInfo_appendModify.resx">
+      <DependentUpon>Form_CarInfo_appendModify.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Config.resx">
+      <DependentUpon>Form_Config.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_DeviceInfo.resx">
+      <DependentUpon>Form_DeviceInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_DeviceInfo_appendModify.resx">
+      <DependentUpon>Form_DeviceInfo_appendModify.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_ExaminerInfo.resx">
+      <DependentUpon>Form_ExaminerInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_ExaminerInfo_appendModify.resx">
+      <DependentUpon>Form_ExaminerInfo_appendModify.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_ExamStatus.resx">
+      <DependentUpon>Form_ExamStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Grouping.resx">
+      <DependentUpon>Form_Grouping.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Help.resx">
+      <DependentUpon>Form_Help.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_CarInfo.resx">
+      <DependentUpon>Form_CarInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_LogQuery.resx">
+      <DependentUpon>Form_LogQuery.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Main.resx">
+      <DependentUpon>Form_Main.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_DBConfig.resx">
+      <DependentUpon>Form_DBConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Password.resx">
+      <DependentUpon>Form_Password.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_PaymentDetail.resx">
+      <DependentUpon>Form_PaymentDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_PricingStrategy.resx">
+      <DependentUpon>Form_PricingStrategy.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Permission.resx">
+      <DependentUpon>Form_Permission.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_PlaceInfo.resx">
+      <DependentUpon>Form_PlaceInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_PlaceInfo_appendModify.resx">
+      <DependentUpon>Form_PlaceInfo_appendModify.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_SchoolInfo.resx">
+      <DependentUpon>Form_SchoolInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_SchoolInfo_appendModify.resx">
+      <DependentUpon>Form_SchoolInfo_appendModify.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Score.resx">
+      <DependentUpon>Form_Score.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Process.resx">
+      <DependentUpon>Form_Process.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_StudentExam.resx">
+      <DependentUpon>Form_StudentExam.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Student_appendModify.resx">
+      <DependentUpon>Form_Student_appendModify.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_SummaryQuery.resx">
+      <DependentUpon>Form_SummaryQuery.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_SummaryStatistices.resx">
+      <DependentUpon>Form_SummaryStatistices.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_TrainBooking.resx">
+      <DependentUpon>Form_TrainBooking.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_TrainBooking_confirm.resx">
+      <DependentUpon>Form_TrainBooking_confirm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_User.resx">
+      <DependentUpon>Form_User.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_User_appendModify.resx">
+      <DependentUpon>Form_User_appendModify.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="Connected Services\TMRIOutAccess\TmriOutAccess.wsdl" />
+    <None Include="IDReader\license.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="IDReader\sdtapi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="IDReader\WltRS.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Resources\Icon.ico" />
+    <None Include="Connected Services\TMRIOutAccess\configuration91.svcinfo" />
+    <None Include="Connected Services\TMRIOutAccess\configuration.svcinfo" />
+    <None Include="Connected Services\TMRIOutAccess\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <Content Include="IDReader\cardapi4.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Finger\libzkfpcsharp.dll" />
+    <Content Include="Management.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Connected Services\TMRIOutAccess\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

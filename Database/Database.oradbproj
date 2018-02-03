@@ -1,0 +1,280 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ProductVersion>12.2.0.1</ProductVersion>
+    <ProjectGuid>fdced9bc-ec54-400c-89af-3212d80b9fa3</ProjectGuid>
+    <DBVERSION>
+    </DBVERSION>
+    <DEFAULTSCHEMANAME>
+    </DEFAULTSCHEMANAME>
+    <AssemblyName>Database</AssemblyName>
+    <Name>Database</Name>
+    <RootNamespace>Database</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="StoredProcedures" />
+    <Folder Include="Scripts\" />
+    <Folder Include="Tables\" />
+    <Folder Include="Views\" />
+    <DBRefs Include="Database References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Scripts\reCompileAll.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\upgrade.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddLog.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddRole.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddUpdateCar.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddUpdateDevice.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddUpdateExaminer.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddUpdatePlace.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddUpdatePricingStrategy.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddUpdateSchool.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddUpdateStudent.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\AddUpdateUser.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\BookFromManagement.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\BookFromVehicle.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\BookFromVehicleNoPassword.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\ChangePassword.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\DESDecrypt.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\DESEncrypt.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\GenerateHMAC.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\GenerateSHA1.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\GenerateSUB2.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\GetPriceByTimes.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\GetRolePermissions.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\GrantRolePermission.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\HandleMisjudge.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Login.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Logout.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\NewBookSequenceNumber.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\NewCarSequenceNumber.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\NewDeviceSequenceNumber.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\NewExaminerSequenceNumber.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\NewExamNumber.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\NewPlaceSequenceNumber.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\NewSchoolCode.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\NewSchoolSequenceNumber.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\NewTradeNumber.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Query17C01Place.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Query17C02Device.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Query17C03Car.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Query17C04Examinator.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Query17C05School.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Query17C06Group.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Query17C07GroupDetail.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\Query17C08Book.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\audit.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\data.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\dropAll.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\Init.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\initRolePermissionUser.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\utlpwdmg.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\RemoveUser.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\RevokeRolePermission.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\SetParameter.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\ShowDateTime.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\UnblockUser.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Tables\BUZ_SUB2_RECORD.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Tables\CreateTable.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Tables\Script_Insert_CFG_DICT.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Tables\Script_Insert_CFG_DRIVER_LICENSE_ITEMS.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Tables\Script_Insert_CFG_ITEMS.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Tables\Script_Insert_CFG_PARAM.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BAS_BOOKING_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BAS_CAR_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BAS_DEVICE_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BAS_DRIVING_SCHOOL_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BAS_EXAMINER_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BAS_GROUPING_DETAIL_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BAS_GROUPING_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BAS_PLACE_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BAS_STUDENT_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BUZ_EXAM_INFO_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BUZ_EXAM_PROCESS_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BUZ_PAYMENT_DETAIL_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\BUZ_SUB2_RECORD_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\CAR_ALLOCATION_CAR_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\CAR_ALLOCATION_STUDENT_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\CFG_PRICING_STRATEGY_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\DBA_AUDIT_TRAIL.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\STUDENT_EXAM_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\STUDENT_SCORE_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\SYS_LOG_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\SYS_ROLE_PERMISSION_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\SYS_USER_ROLE_PERMISSION_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Views\SYS_USER_VIEW.sql">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <DBRef Include="Database References\TNZC_DZ.orcl\">
+      <ConnectionString>DATA SOURCE=localhost:1521/orcl;PERSIST SECURITY INFO=True;USER ID=TNZC_DZ</ConnectionString>
+    </DBRef>
+  </ItemGroup>
+</Project>

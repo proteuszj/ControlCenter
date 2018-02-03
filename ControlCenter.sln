@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{9F1A8348-EF5A-4C4F-B8AA-45D52FFB76B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBTools", "DBTools\DBTools.csproj", "{B40B6300-B8C5-4730-BA6E-DEC2A978CD72}"
+EndProject
+Project("{218574D1-FF94-4B95-8577-A6D58C11C315}") = "Database", "Database\Database.oradbproj", "{FDCED9BC-EC54-400C-89AF-3212D80B9FA3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9F1A8348-EF5A-4C4F-B8AA-45D52FFB76B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F1A8348-EF5A-4C4F-B8AA-45D52FFB76B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F1A8348-EF5A-4C4F-B8AA-45D52FFB76B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F1A8348-EF5A-4C4F-B8AA-45D52FFB76B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B40B6300-B8C5-4730-BA6E-DEC2A978CD72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B40B6300-B8C5-4730-BA6E-DEC2A978CD72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B40B6300-B8C5-4730-BA6E-DEC2A978CD72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B40B6300-B8C5-4730-BA6E-DEC2A978CD72}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B4583707-0735-4693-B04D-694A5EC2CCD1}
+		VisualSVNWorkingCopyRoot = .
+	EndGlobalSection
+EndGlobal

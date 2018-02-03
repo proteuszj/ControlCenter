@@ -75,9 +75,9 @@ namespace Client
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             string fileVersion = ((AssemblyFileVersionAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyFileVersionAttribute), false)[0]).Version;
 
-            this.Text = String.Format($"{productName} v{version} - {fileVersion}" );
+            this.Text = String.Format($"{productName} v{version}" );
 #if DEBUG
-            this.Text += "[DEBUG]";
+            this.Text += $" - {fileVersion} [DEBUG]";
 #endif
             toolStripLabel_role.Text = "未登录";
         }

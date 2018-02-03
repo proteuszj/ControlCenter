@@ -645,7 +645,7 @@ namespace Client
         }
 
         /// <summary>
-        /// 学员预约训练
+        /// 预约计次训练
         /// </summary>
         /// <param name="studentIdNumber">学员身份证号码</param>
         /// <param name="subjectName">训练科目</param>
@@ -689,6 +689,66 @@ namespace Client
             cmd.Parameters["studentIDNumber"].Value = studentIdNumber;
             cmd.Parameters["subjectName"].Value = subjectName;
             cmd.Parameters["times"].Value = times;
+            cmd.Parameters["amount"].Value = amount;
+            cmd.Parameters["paymentWay"].Value = paymentWay;
+            cmd.Parameters["bookingDatetime"].Value = bookingDatetime;
+            cmd.Parameters["carLicensePlate"].Value = carLicensePlate;
+            cmd.Parameters["cashierName"].Value = cashierName;
+            cmd.Parameters["cashierIDNumber"].Value = cashierIDNumber;
+            cmd.Parameters["hostIP"].Value = Form_Main.terminalIP;
+            cmd.Parameters["hostMAC"].Value = Form_Main.terminalMAC;
+
+            cmd.ExecuteNonQuery();
+
+            message = cmd.Parameters["message"].Value.ToString();
+            return Convert.ToInt32(cmd.Parameters["ReturnValue"].Value.ToString());
+        }
+
+        /// <summary>
+        /// 预约计时训练
+        /// </summary>
+        /// <param name="studentIdNumber">学员身份证号码</param>
+        /// <param name="subjectName">训练科目</param>
+        /// <param name="studyTime">预约时间</param>
+        /// <param name="amount">金额</param>
+        /// <param name="paymentWay">支付方式</param>
+        /// <param name="bookingDatetime">预约时间</param>
+        /// <param name="carLicensePlate">指定车辆号牌</param>
+        /// <param name="cashierName">收银员姓名</param>
+        /// <param name="cashierIDNumber">收银员身份证号码</param>
+        /// <param name="message">返回信息</param>
+        /// <returns>
+        ///     0：成功
+        ///     -1：操作员不存在
+        ///     -2：学员不存在
+        ///     -3：金额不正确
+        ///     -4：车辆不存在
+        /// </returns>
+        public int BookFromManagementByTime(string studentIdNumber, string subjectName, int studyTime, string amount, string paymentWay, string bookingDatetime, string carLicensePlate, string cashierName, string cashierIDNumber, out string message)
+        {
+            OracleCommand cmd = conn.CreateCommand();
+            cmd.CommandText = "BookFromManagementByTime";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new OracleParameter("ReturnValue", OracleDbType.Int32, 0, null, ParameterDirection.ReturnValue));
+            cmd.Parameters.Add(new OracleParameter("message", OracleDbType.Varchar2, 1000, null, ParameterDirection.Output));
+            cmd.Parameters.Add(new OracleParameter("operatorLoginName", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("studentIDNumber", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("subjectName", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("studyTime", OracleDbType.Int32, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("amount", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("paymentWay", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("bookingDatetime", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("carLicensePlate", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("cashierName", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("cashierIDNumber", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("hostIP", OracleDbType.Varchar2, ParameterDirection.Input));
+            cmd.Parameters.Add(new OracleParameter("hostMAC", OracleDbType.Varchar2, ParameterDirection.Input));
+
+            cmd.Parameters["operatorLoginName"].Value = loginName;
+            cmd.Parameters["studentIDNumber"].Value = studentIdNumber;
+            cmd.Parameters["subjectName"].Value = subjectName;
+            cmd.Parameters["studyTime"].Value = studyTime;
             cmd.Parameters["amount"].Value = amount;
             cmd.Parameters["paymentWay"].Value = paymentWay;
             cmd.Parameters["bookingDatetime"].Value = bookingDatetime;
@@ -1691,7 +1751,49 @@ namespace Client
             message = param[1].Value.ToString();
             return Convert.ToSingle(param[0].Value.ToString());
         }
-        
+
+        /// <summary>
+        /// 根据预约时间计算金额
+        /// </summary>
+        /// <param name="studyTime">预约时间</param>
+        /// <param name="startTime">预约开始时间</param>
+        /// <param name="schoolName">驾校名称</param>
+        /// <param name="studentIDNumber">学员身份证号码</param>
+        /// <param name="message">返回信息</param>
+        /// <returns>金额</returns>
+        public float GetPriceByTime(int studyTime, string startTime, string schoolName, string studentIDNumber, out string message)
+        {
+            OracleCommand cmd = conn.CreateCommand();
+            cmd.CommandText = "GetPriceByTime";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            OracleParameter[] param = {
+                // 返回值必须是第一个参数
+                new OracleParameter("ReturnValue", OracleDbType.Int32, 0, ParameterDirection.ReturnValue, true, 0, 0, "", DataRowVersion.Default, Convert.DBNull),
+                new OracleParameter("message", OracleDbType.Varchar2, 1000),
+                new OracleParameter("studyTime", OracleDbType.Varchar2),
+                new OracleParameter("startTime", OracleDbType.Varchar2),
+                new OracleParameter("schoolName", OracleDbType.Varchar2),
+                new OracleParameter("studentIDNumber", OracleDbType.Varchar2)
+            };
+
+            param[1].Direction = ParameterDirection.Output;
+            for (int i = 2; i < param.Length; i++)
+                param[i].Direction = ParameterDirection.Input;
+
+            param[2].Value = studyTime;
+            param[3].Value = startTime;
+            param[4].Value = schoolName;
+            param[5].Value = studentIDNumber;
+
+            cmd.Parameters.AddRange(param);
+
+            cmd.ExecuteNonQuery();
+
+            message = param[1].Value.ToString();
+            return Convert.ToSingle(param[0].Value.ToString());
+        }
+
         /// <summary>
         /// 增加或修改定价策略
         /// </summary>

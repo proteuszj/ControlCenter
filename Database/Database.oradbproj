@@ -19,10 +19,10 @@
     <DBRefs Include="Database References\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Scripts\reCompileAll.sql">
+    <Content Include="Scripts\clearTestData.sql">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Scripts\upgrade.sql">
+    <Content Include="Scripts\reCompileAll.sql">
       <SubType>Content</SubType>
     </Content>
     <Content Include="StoredProcedures\AddLog.sql">
@@ -58,6 +58,9 @@
     <Content Include="StoredProcedures\BookFromManagement.sql">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="StoredProcedures\BookFromManagementByTime.sql">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="StoredProcedures\BookFromVehicle.sql">
       <SubType>Content</SubType>
     </Content>
@@ -80,6 +83,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="StoredProcedures\GenerateSUB2.sql">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="StoredProcedures\GetPriceByTime.sql">
       <SubType>Content</SubType>
     </Content>
     <Content Include="StoredProcedures\GetPriceByTimes.sql">

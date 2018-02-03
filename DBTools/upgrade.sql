@@ -1622,9 +1622,794 @@ from bas_student
 where ID in (select distinct(STUDENT_ID) from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select * from buz_exam_info where BOOKING_ID=bas_booking.ID))
 order by (select min(id) from bas_booking where student_id=bas_student.id and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select *from buz_exam_info where BOOKING_ID=bas_booking.ID))';
 
+--1.0.0.2 start--
+            dbms_output.put_line('version 1.0.0.2');
+			--Views\CAR_ALLOCATION_STUDENT_VIEW;
+execute immediate 'CREATE OR REPLACE FORCE VIEW CAR_ALLOCATION_STUDENT_VIEW AS 
+select 
+	(select SEQUENCENUMBER+1-(select min(SEQUENCENUMBER) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')) from bas_booking where id=(select max(id) from bas_booking where STUDENT_ID=bas_student.ID and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd''))) SEQUENCE_NUMBER,
+    NAME,
+    IDNUMBER,
+    DRIVER_LICENSE_TYPE,
+    (select CARNUMBER from bas_car where ID=(select CAR_ID from bas_booking where id=(select max(id) from bas_booking where STUDENT_ID=bas_student.ID and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')))) BOOKING_CAR,
+    (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID) BOOKING_TIMES,
+    (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and  STUDENT_ID=BAS_STUDENT.ID)) LEFT_TIMES
+from bas_student
+where ID in (select distinct(STUDENT_ID) from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select * from buz_exam_info where BOOKING_ID=bas_booking.ID))
+order by (select min(id) from bas_booking where student_id=bas_student.id and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select *from buz_exam_info where BOOKING_ID=bas_booking.ID))';
 
+			--Views\CAR_ALLOCATION_CAR_VIEW;
+execute immediate 'CREATE OR REPLACE FORCE VIEW CAR_ALLOCATION_CAR_VIEW AS 
+select
+    LICENSE_PLATE,
+    CARNUMBER,
+    QUALIFIED_CAR_TYPE,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=1025 and DICT_CODE=PROCESS_TYPE) PROCESS_TYPE_DICTNAME,
+	(select ITEM_NAME from CFG_ITEMS where ITEM_CODE=EXAM_ITEM) EXAM_ITEM_DICTNAME,
 
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)) and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ((select EXAM_END_TIME from buz_exam_info where ID=EXAM_ID) is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)))-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and  STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID))))>0)    
+        then (select SEQUENCENUMBER+1-(select min(SEQUENCENUMBER) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')) from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)) 
+        else null 
+    end SEQUENCE_NUMBER,
 
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)) and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ((select EXAM_END_TIME from buz_exam_info where ID=EXAM_ID) is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)))-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and  STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID))))>0)    
+        then (select NAME from bas_student where ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID))) 
+        else null 
+    end STUDENT_NAME,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)) and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ((select EXAM_END_TIME from buz_exam_info where ID=EXAM_ID) is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)))-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and  STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID))))>0)    
+        then (select IDNUMBER from bas_student where ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID))) 
+        else null 
+    end STUDENT_IDNUMBER,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)) and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ((select EXAM_END_TIME from buz_exam_info where ID=EXAM_ID) is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)))-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and  STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID))))>0)    
+        then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID))) 
+        else null 
+    end BOOKING_TIMES,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)) and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ((select EXAM_END_TIME from buz_exam_info where ID=EXAM_ID) is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)))-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and  STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID))))>0)    
+        then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)))-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and  STUDENT_ID=(select STUDENT_ID from bas_booking where ID=(select BOOKING_ID from buz_exam_info where ID=buz_exam_process.EXAM_ID)))) 
+        else null 
+    end LEFT_TIMES,
+    
+    USE_STATUS
+from bas_car left join buz_exam_process on buz_exam_process.ID in (select max(ID) from buz_exam_process where EXAM_ID in (select max(ID) from buz_exam_info where substr(EXAM_START_TIME,1,8)=to_char(current_date, ''yyyymmdd'') group by CAR_ID) group by EXAM_ID) and bas_car.ID=(select CAR_ID from buz_exam_info where ID= buz_exam_process.EXAM_ID)
+order by bas_car.USE_STATUS, bas_car.ID';
+			update cfg_param set param_value=5 where param_name='CAR_ALLOCATION_INTERVAL';
+
+			update CFG_PARAM set PARAM_VALUE='1.0.0.3' where PARAM_NAME='DATABASE_VERSION';
+--1.0.0.2 end--
+
+--1.0.0.3 start--
+            dbms_output.put_line('version 1.0.0.3');
+			execute immediate 'alter table bas_booking rename column study_times to STUDY_TIME';
+			execute immediate 'alter table CFG_PRICING_STRATEGY add (FEE_TYPE varchar2(8) null)';
+			execute immediate 'update CFG_PRICING_STRATEGY set FEE_TYPE=''COUNT''';
+			execute immediate 'alter table CFG_PRICING_STRATEGY modify (FEE_TYPE varchar2(8) not null)';
+			execute immediate 'insert into CFG_PRICING_STRATEGY(ID, PRIORITY, ACTION, AMOUNT, FEE_TYPE) values(SEQU_CFG_PRICING_STRATEGY_ID.nextval, 0, ''set'', 200, ''HOUR'')';
+
+			update sys_permission set name='预约计次培训' where name='预约培训';
+			update sys_permission set code='0205' where name='过程查询';
+			update sys_permission set code='0204' where name='分车叫号';
+			update sys_permission set code='0203' where name='支付流水';
+			insert into SYS_PERMISSION(CODE, NAME) values('0202', '预约计时培训');
+			insert into SYS_ROLE_PERMISSION(ROLE_ID, PERMISSION_CODE) values((select id from sys_role where name='管理员'), '0205');
+			insert into SYS_ROLE_PERMISSION(ROLE_ID, PERMISSION_CODE) values((select id from sys_role where name='收银员'), '0205');
+
+			--StoredProcedures\Query17C05School;
+execute immediate 'create or replace procedure Query17C08Book
+(
+	lsh in varchar2,		--流水号 Varchar2	13	不可空
+	kskm in varchar2,		--考试科目 Char	1	不可空	1科目一；2科目二；3科目三	
+	zkzmbh in varchar2,		--准考证明编号 Char	12	不可空	
+	sfzmmc in varchar2,		--身份证明名称 Char	1	不可空
+	sfzmhm in varchar2,		--身份证明号码 Varchar2	18	不可空
+	xm in varchar2,			--姓名 Varchar2	30	不可空
+	ksyy in varchar2,		--考试原因 Char	1	不可空
+	xxsj in number,			--学习时间 Number      可空
+	yyrq in varchar2,		--预约日期 Date        不可空 yyyymmddhhmmss
+	ykrq in varchar2,		--约考日期 Date        不可空 yyyymmdd
+	kscx in varchar2,		--考试车型 Varchar2	6	不可空
+	ksdd in varchar2,		--考试地点 Varchar2	64	不可空
+	kscc in number,			--考试场次 Number      不可空
+	kchp in varchar2,		--考试车辆号牌 Varchar2	15	可空
+	jbr in varchar2,		--经办人 Varchar2	30	不可空
+	glbm in varchar2,		--管理部门 Varchar2	12	不可空
+	dlr in varchar2,		--代理人 Varchar2	64	可空
+	ksrq in varchar2,		--考试日期 Date        可空 yyyymmdd
+	kscs in number,			--考试次数 Number      可空
+	ksy1 in varchar2,		--考试员1 Varchar2	30	可空
+	ksy2 in varchar2,		--考试员2 Varchar2	30	可空
+	zt in varchar2,			--状态 Char	1	不可空	0未考试；2考试不合格
+	pxshrq in varchar2,		--培训审核日期 Date        可空 yyyymmdd
+	sfyk in varchar2,		--是否夜考 Char	1	可空	0否；1是
+	zkykrq in varchar2,		--桩考约考日期 Date        可空 yyyymmdd
+	zksfhg in varchar2,		--桩考是否合格 Char	1	可空
+	clzl in varchar2,		--车辆种类 Varchar2	10	可空
+	jly in varchar2,		--教练员 Varchar2	30	可空
+	zkkf in number,			--桩考扣分 Number      可空
+	ckyy in varchar2,		--场考是否已约 Char	1	不可空	0未预约；1已预约
+	ywblbm in varchar2,		--业务办理部门 Varchar2	12	不可空
+	yycs in number,			--预约次数 Number	1	不可空
+	bcyykscs in number		--本次预约考试次数 Number	1	不可空
+) as
+	n number;
+	studentID BAS_STUDENT.ID%TYPE;
+begin
+	select count(*) into n from BAS_PLACE where CODE=ksdd;
+	if n=0 then
+		return;
+	end if;
+
+	select count(*) into n from BAS_STUDENT where IDNUMBER=sfzmhm;
+	if n=0 then
+		studentID:=SEQU_BAS_STUDENT_ID.nextval;
+		insert into BAS_STUDENT(
+			ID,
+			IDTYPE,
+			IDNUMBER,
+			NAME,
+			DRIVER_LICENSE_TYPE,
+			SCHOOL_NAME,
+			PASSWORD,
+			CREATE_TIME,
+			UPDATE_TIME)
+		values(
+			studentID,
+			sfzmmc,
+			sfzmhm,
+			xm,
+			kscx,
+			case when dlr is null then null else (select NAME from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			''123'',
+			to_char(current_date, ''yyyymmddhh24miss''),
+			to_char(current_date, ''yyyymmddhh24miss''));
+	else
+		update BAS_STUDENT set
+			IDTYPE=sfzmmc,
+			NAME=xm,
+			DRIVER_LICENSE_TYPE=kscx,
+			SCHOOL_NAME=case when dlr is null then null else (select NAME from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			CREATE_TIME=to_char(current_date, ''yyyymmddhh24miss''),
+			UPDATE_TIME=to_char(current_date, ''yyyymmddhh24miss'')
+		where IDNUMBER=sfzmhm;
+		select ID into studentID from BAS_STUDENT where IDNUMBER=sfzmhm;
+	end if;
+	select count(*) into n from BAS_BOOKING where SEQUENCENUMBER=lsh;
+	if n>0 then
+		update BAS_BOOKING set
+			SUBJECT=kskm,
+			EXAMNUMBER=zkzmbh,
+			STUDENT_ID=studentID,
+			EXAM_REASON=ksyy,
+			STUDY_TIME=xxsj,
+			BOOKING_DATETIME=yyrq,
+			BOOKING_TIMES=yycs,
+			BOOKING_EXAM_DATE=ykrq,
+			DRIVER_LICENSE_TYPE=kscx,
+			PLACE_ID=(select ID from BAS_PLACE where CODE=ksdd),
+			EXAM_SESSION=kscc,
+			CAR_ID=case when kchp is null then null else (select ID from BAS_CAR where LICENSE_PLATE=kchp) end,
+			OPERATOR_NAME=jbr,
+			BRANCH_ADMINISTRATION=glbm,
+			SCHOOL_ID=case when dlr is null then null else (select ID from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			EXAM_DATE=ksrq,
+			EXAM_TIMES=kscs,
+			EXAMINER1_ID=case when ksy1 is null then null else (select ID from BAS_EXAMINER where NAME=ksy1) end,
+			EXAMINER2_ID=case when ksy2 is null then null else (select ID from BAS_EXAMINER where NAME=ksy2) end,
+			EXAM_STATUS=zt,
+			TRAINING_AUDIT_DATE=pxshrq,
+			IS_NIGHT_EXAM=sfyk,
+			PILE_EXAM_BOOKING_DATE=zkykrq,
+			PILE_EXAM_STATUS=zksfhg,
+			CAR_BREED=clzl,
+			COACH=jly,
+			PILE_EXAM_DEDUCT_SCORE=zkkf,
+			IS_PLACE_EXAM=ckyy,
+			BRANCH_BUSINESS=ywblbm,
+			UPDATE_TIME=to_char(current_date,''yyyymmddhh24miss'')
+		where SEQUENCENUMBER=lsh;
+	else
+		insert into BAS_BOOKING(
+			ID,
+			SEQUENCENUMBER,
+			SUBJECT,
+			EXAMNUMBER,
+			STUDENT_ID,
+			EXAM_REASON,
+			STUDY_TIME,
+			BOOKING_DATETIME,
+			BOOKING_TIMES,
+			BOOKING_EXAM_DATE,
+			DRIVER_LICENSE_TYPE,
+			PLACE_ID,
+			EXAM_SESSION,
+			CAR_ID,
+			OPERATOR_NAME,
+			BRANCH_ADMINISTRATION,
+			SCHOOL_ID,
+			EXAM_DATE,
+			EXAM_TIMES,
+			EXAMINER1_ID,
+			EXAMINER2_ID,
+			EXAM_STATUS,
+			TRAINING_AUDIT_DATE,
+			IS_NIGHT_EXAM,
+			PILE_EXAM_BOOKING_DATE,
+			PILE_EXAM_STATUS,
+			CAR_BREED,
+			COACH,
+			PILE_EXAM_DEDUCT_SCORE,
+			IS_PLACE_EXAM,
+			BRANCH_BUSINESS,
+			UPDATE_TIME)
+		values(
+			SEQU_BAS_BOOKING_ID.nextval,
+			lsh,
+			kskm,
+			zkzmbh,
+			studentID,
+			ksyy,
+			xxsj,
+			yyrq,
+			yycs,
+			ykrq,
+			kscx,
+			(select ID from BAS_PLACE where CODE=ksdd),
+			kscc,
+			case when kchp is null then null else (select ID from BAS_CAR where LICENSE_PLATE=kchp) end,
+			jbr,
+			glbm,
+			case when dlr is null then null else (select ID from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			ksrq,
+			kscs,
+			case when ksy1 is null then null else (select ID from BAS_EXAMINER where NAME=ksy1) end,
+			case when ksy2 is null then null else (select ID from BAS_EXAMINER where NAME=ksy2) end,
+			zt,
+			pxshrq,
+			sfyk,
+			zkykrq,
+			zksfhg,
+			clzl,
+			jly,
+			zkkf,
+			ckyy,
+			ywblbm,
+			to_char(current_date,''yyyymmddhh24miss''));
+	end if;
+	commit;
+end Query17C08Book;';
+			--StoredProcedures\GetPriceByTimes;
+execute immediate 'create or replace function GetPriceByTimes
+(
+	message out varchar2,
+	times in integer,
+	startTime in varchar2,
+	schoolName in varchar2,
+	studentIDNumber in varchar2
+) return number as
+    realStartTime varchar2(14);
+	totalAmount number(8,2);
+	n integer;
+	checkSchoolName CFG_PRICING_STRATEGY.SCHOOL_NAME%TYPE;
+	checkStudentIDNumber CFG_PRICING_STRATEGY.STUDENT_IDNUMBER%TYPE;
+	cur SYS_REFCURSOR;
+    cur_rec CFG_PRICING_STRATEGY%ROWTYPE;
+	ref2 boolean;
+	flag boolean;
+	currentPriority integer;
+begin
+    if startTime is null then
+        realStartTime:=to_char(current_date, ''yyyymmddhh24miss''); 
+    else
+        realStartTime:=startTime;
+    end if;
+
+	totalAmount:=0;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where SCHOOL_NAME=schoolName;
+	if n>0 then
+		checkSchoolName:=schoolName;
+	else
+		checkSchoolName:=null;
+	end if;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where STUDENT_IDNUMBER=studentIDNumber;
+	if n>0 then
+		checkStudentIDNumber:=studentIDNumber;
+	else
+		checkStudentIDNumber:=null;
+	end if;
+	
+    open cur for select *
+		from CFG_PRICING_STRATEGY
+		where
+			FEE_TYPE=''COUNT'' and
+			(EFFECTIVE_DATE is null or EFFECTIVE_DATE<=substr(realStartTime, 1, 8)) and
+			(EXPIRED_DATE is null or substr(realStartTime, 1, 8)<=EXPIRED_DATE) and
+			(START_DATE is null or START_DATE<=substr(realStartTime, 1, 8)) and
+			(END_DATE is null or substr(realStartTime, 1, 8)<=END_DATE) and
+			(START_TIME is null or START_TIME<=substr(realStartTime, 9,6)) and
+			(END_TIME is null or substr(realStartTime, 9,6)<=END_TIME) and
+			(checkSchoolName is null or checkSchoolName=SCHOOL_NAME) and
+			(checkStudentIDNumber is null or checkStudentIDNumber=STUDENT_IDNUMBER)
+		order by PRIORITY;
+	currentPriority:=null;
+	message:='''';
+    loop
+        fetch cur into cur_rec;
+        exit when cur%NOTFOUND;
+        
+		if currentPriority=cur_rec.PRIORITY then continue;			--this priority already done
+		end if;
+		
+		ref2:=true;
+		flag:=true;
+		if cur_rec.REFERENCE_METHOD1 is not null then
+			case cur_rec.REFERENCE_METHOD1
+				when ''>'' then flag:=totalAmount>cur_rec.REFERENCE_AMOUNT1;
+				when ''='' then flag:=totalAmount=cur_rec.REFERENCE_AMOUNT1;
+				when ''<'' then flag:=totalAmount<cur_rec.REFERENCE_AMOUNT1;
+				when ''>='' then flag:=totalAmount>=cur_rec.REFERENCE_AMOUNT1;
+				when ''<='' then flag:=totalAmount<=cur_rec.REFERENCE_AMOUNT1;
+				when ''<>'' then flag:=totalAmount<>cur_rec.REFERENCE_AMOUNT1;
+				when ''!='' then flag:=totalAmount!=cur_rec.REFERENCE_AMOUNT1;
+				else flag:=true;
+			end case;
+			if cur_rec.REFERENCE_METHOD2 is not null and cur_rec.REFERENCE_RELATION is not null then
+				case cur_rec.REFERENCE_METHOD2
+					when ''>'' then ref2:=totalAmount>cur_rec.REFERENCE_AMOUNT2;
+					when ''='' then ref2:=totalAmount=cur_rec.REFERENCE_AMOUNT2;
+					when ''<'' then ref2:=totalAmount<cur_rec.REFERENCE_AMOUNT2;
+					when ''>='' then ref2:=totalAmount>=cur_rec.REFERENCE_AMOUNT2;
+					when ''<='' then ref2:=totalAmount<=cur_rec.REFERENCE_AMOUNT2;
+					when ''<>'' then ref2:=totalAmount<>cur_rec.REFERENCE_AMOUNT2;
+					when ''!='' then ref2:=totalAmount!=cur_rec.REFERENCE_AMOUNT2;
+					else ref2:=true;
+				end case;
+				if cur_rec.REFERENCE_RELATION=''||'' then flag:=flag or ref2;
+				else flag:=flag and ref2;
+				end if;
+			end if;
+		end if;
+		
+		if flag then
+			case cur_rec.ACTION
+				when ''set'' then totalAmount:=cur_rec.AMOUNT*times;
+				when ''add'' then totalAmount:=totalAmount+cur_rec.AMOUNT;
+				when ''sub'' then totalAmount:=totalAmount-cur_rec.AMOUNT;
+				when ''mul'' then totalAmount:=totalAmount*cur_rec.AMOUNT;
+				when ''div'' then totalAmount:=totalAmount/cur_rec.AMOUNT;
+				else null;
+			end case;
+			currentPriority:=cur_rec.PRIORITY;
+			if length(message)>0 then message:=message||'';''||chr(13)||chr(10); end if;
+			message:=message||''COUNT, ''||''priority: ''||cur_rec.PRIORITY||'' ''||cur_rec.ACTION||'' ''||cur_rec.AMOUNT
+				||'' effect on: ''||case when cur_rec.EFFECTIVE_DATE is null then ''now'' else cur_rec.EFFECTIVE_DATE end
+				||'' to ''||case when cur_rec.EXPIRED_DATE is null then ''forever'' else cur_rec.EXPIRED_DATE end||'' ''
+				||case when cur_rec.REFERENCE_METHOD1 is null then '''' else '' when ''||cur_rec.REFERENCE_METHOD1||cur_rec.REFERENCE_AMOUNT1||case when cur_rec.REFERENCE_METHOD2 is null then '''' else cur_rec.REFERENCE_RELATION||cur_rec.REFERENCE_METHOD2||cur_rec.REFERENCE_AMOUNT2 end end
+				||'' at ''||case when cur_rec.START_TIME is null then ''000000'' else cur_rec.START_TIME end
+				||''-''||case when cur_rec.END_TIME is null then ''235959'' else cur_rec.END_TIME end
+				||'' from ''||case when cur_rec.START_DATE is null then ''now'' else cur_rec.START_DATE end
+				||'' to ''||case when cur_rec.START_DATE is null then ''forever'' else cur_rec.START_DATE end
+				||case when cur_rec.SCHOOL_NAME is null then '''' else '' for school: ''||cur_rec.SCHOOL_NAME end
+				||case when cur_rec.STUDENT_IDNUMBER is null then '''' else '' for student: ''||cur_rec.STUDENT_IDNUMBER end;
+		end if;
+	end loop;
+	return totalAmount;
+end GetPriceByTimes;';
+
+			--StoredProcedures\GetPriceByTime;
+execute immediate 'create or replace function GetPriceByTime
+(
+	message out varchar2,
+	studyTime in integer,
+	startTime in varchar2,
+	schoolName in varchar2,
+	studentIDNumber in varchar2
+) return number as
+    realStartTime varchar2(14);
+	totalAmount number(8,2);
+	n integer;
+	checkSchoolName CFG_PRICING_STRATEGY.SCHOOL_NAME%TYPE;
+	checkStudentIDNumber CFG_PRICING_STRATEGY.STUDENT_IDNUMBER%TYPE;
+	cur SYS_REFCURSOR;
+    cur_rec CFG_PRICING_STRATEGY%ROWTYPE;
+	ref2 boolean;
+	flag boolean;
+	currentPriority integer;
+begin
+    if startTime is null then
+        realStartTime:=to_char(current_date, ''yyyymmddhh24miss''); 
+    else
+        realStartTime:=startTime;
+    end if;
+
+	totalAmount:=0;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where SCHOOL_NAME=schoolName;
+	if n>0 then
+		checkSchoolName:=schoolName;
+	else
+		checkSchoolName:=null;
+	end if;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where STUDENT_IDNUMBER=studentIDNumber;
+	if n>0 then
+		checkStudentIDNumber:=studentIDNumber;
+	else
+		checkStudentIDNumber:=null;
+	end if;
+	
+    open cur for select *
+		from CFG_PRICING_STRATEGY
+		where
+			FEE_TYPE=''HOUR'' and
+			(EFFECTIVE_DATE is null or EFFECTIVE_DATE<=substr(realStartTime, 1, 8)) and
+			(EXPIRED_DATE is null or substr(realStartTime, 1, 8)<=EXPIRED_DATE) and
+			(START_DATE is null or START_DATE<=substr(realStartTime, 1, 8)) and
+			(END_DATE is null or substr(realStartTime, 1, 8)<=END_DATE) and
+			(START_TIME is null or START_TIME<=substr(realStartTime, 9,6)) and
+			(END_TIME is null or substr(realStartTime, 9,6)<=END_TIME) and
+			(checkSchoolName is null or checkSchoolName=SCHOOL_NAME) and
+			(checkStudentIDNumber is null or checkStudentIDNumber=STUDENT_IDNUMBER)
+		order by PRIORITY;
+	currentPriority:=null;
+	message:='''';
+    loop
+        fetch cur into cur_rec;
+        exit when cur%NOTFOUND;
+        
+		if currentPriority=cur_rec.PRIORITY then continue;			--this priority already done
+		end if;
+		
+		ref2:=true;
+		flag:=true;
+		if cur_rec.REFERENCE_METHOD1 is not null then
+			case cur_rec.REFERENCE_METHOD1
+				when ''>'' then flag:=totalAmount>cur_rec.REFERENCE_AMOUNT1;
+				when ''='' then flag:=totalAmount=cur_rec.REFERENCE_AMOUNT1;
+				when ''<'' then flag:=totalAmount<cur_rec.REFERENCE_AMOUNT1;
+				when ''>='' then flag:=totalAmount>=cur_rec.REFERENCE_AMOUNT1;
+				when ''<='' then flag:=totalAmount<=cur_rec.REFERENCE_AMOUNT1;
+				when ''<>'' then flag:=totalAmount<>cur_rec.REFERENCE_AMOUNT1;
+				when ''!='' then flag:=totalAmount!=cur_rec.REFERENCE_AMOUNT1;
+				else flag:=true;
+			end case;
+			if cur_rec.REFERENCE_METHOD2 is not null and cur_rec.REFERENCE_RELATION is not null then
+				case cur_rec.REFERENCE_METHOD2
+					when ''>'' then ref2:=totalAmount>cur_rec.REFERENCE_AMOUNT2;
+					when ''='' then ref2:=totalAmount=cur_rec.REFERENCE_AMOUNT2;
+					when ''<'' then ref2:=totalAmount<cur_rec.REFERENCE_AMOUNT2;
+					when ''>='' then ref2:=totalAmount>=cur_rec.REFERENCE_AMOUNT2;
+					when ''<='' then ref2:=totalAmount<=cur_rec.REFERENCE_AMOUNT2;
+					when ''<>'' then ref2:=totalAmount<>cur_rec.REFERENCE_AMOUNT2;
+					when ''!='' then ref2:=totalAmount!=cur_rec.REFERENCE_AMOUNT2;
+					else ref2:=true;
+				end case;
+				if cur_rec.REFERENCE_RELATION=''||'' then flag:=flag or ref2;
+				else flag:=flag and ref2;
+				end if;
+			end if;
+		end if;
+		
+		if flag then
+			case cur_rec.ACTION
+				when ''set'' then totalAmount:=cur_rec.AMOUNT*studyTime/60;
+				when ''add'' then totalAmount:=totalAmount+cur_rec.AMOUNT;
+				when ''sub'' then totalAmount:=totalAmount-cur_rec.AMOUNT;
+				when ''mul'' then totalAmount:=totalAmount*cur_rec.AMOUNT;
+				when ''div'' then totalAmount:=totalAmount/cur_rec.AMOUNT;
+				else null;
+			end case;
+			currentPriority:=cur_rec.PRIORITY;
+			if length(message)>0 then message:=message||'';''||chr(13)||chr(10); end if;
+			message:=message||''HOUR, ''||''priority: ''||cur_rec.PRIORITY||'' ''||cur_rec.ACTION||'' ''||cur_rec.AMOUNT
+				||'' effect on: ''||case when cur_rec.EFFECTIVE_DATE is null then ''now'' else cur_rec.EFFECTIVE_DATE end
+				||'' to ''||case when cur_rec.EXPIRED_DATE is null then ''forever'' else cur_rec.EXPIRED_DATE end||'' ''
+				||case when cur_rec.REFERENCE_METHOD1 is null then '''' else '' when ''||cur_rec.REFERENCE_METHOD1||cur_rec.REFERENCE_AMOUNT1||case when cur_rec.REFERENCE_METHOD2 is null then '''' else cur_rec.REFERENCE_RELATION||cur_rec.REFERENCE_METHOD2||cur_rec.REFERENCE_AMOUNT2 end end
+				||'' at ''||case when cur_rec.START_TIME is null then ''000000'' else cur_rec.START_TIME end
+				||''-''||case when cur_rec.END_TIME is null then ''235959'' else cur_rec.END_TIME end
+				||'' from ''||case when cur_rec.START_DATE is null then ''now'' else cur_rec.START_DATE end
+				||'' to ''||case when cur_rec.START_DATE is null then ''forever'' else cur_rec.START_DATE end
+				||case when cur_rec.SCHOOL_NAME is null then '''' else '' for school: ''||cur_rec.SCHOOL_NAME end
+				||case when cur_rec.STUDENT_IDNUMBER is null then '''' else '' for student: ''||cur_rec.STUDENT_IDNUMBER end;
+		end if;
+	end loop;
+	return totalAmount;
+end GetPriceByTime;';
+			--StoredProcedures\BookFromManagementByTime;
+execute immediate 'create or replace function BookFromManagementByTime
+(
+	message out varchar2,
+	operatorLoginName in varchar2,
+	studentIDNumber in BAS_STUDENT.IDNUMBER%TYPE,
+	subjectName in varchar2,
+	studyTime in integer,
+	amount in number,
+	paymentWay in CFG_DICT.DICT_NAME%TYPE,
+	bookingDatetime in BAS_BOOKING.BOOKING_DATETIME%TYPE,
+	carLicensePlate in BAS_CAR.LICENSE_PLATE%TYPE,
+	cashierName in varchar2,
+	cashierIDNumber in varchar2,
+	hostIP in varchar2,					--host ip
+	hostMAC in varchar2					--host mac
+) return integer as
+	n integer;
+	studentID BAS_STUDENT.ID%TYPE;
+	licenseType BAS_STUDENT.DRIVER_LICENSE_TYPE%TYPE;
+	schoolName BAS_DRIVING_SCHOOL.NAME%TYPE;
+	carID BAS_CAR.ID%TYPE;
+	bookingID BAS_BOOKING.ID%TYPE;
+	tradeNumber BUZ_PAYMENT_DETAIL.TRADE_NO%TYPE;
+	currentDate BAS_BOOKING.BOOKING_DATETIME%TYPE;
+begin
+	select count(*) into n from SYS_USER where LOGIN_NAME=operatorLoginName;
+	if n=0 then
+		message:=''操作员：''||operatorLoginName||''不存在'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -1;
+	end if;
+
+	select count(*) into n from BAS_STUDENT where IDNUMBER=studentIDNumber;
+	if n=0 then
+		message:=''学员：''||studentIDNumber||''不存在'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -2;
+	end if;
+	select ID, DRIVER_LICENSE_TYPE, SCHOOL_NAME into studentID, licenseType, schoolName from BAS_STUDENT where IDNUMBER=studentIDNumber;
+
+	if amount<>GetPriceByTime(message, studyTime, bookingDatetime, schoolName, studentIDNumber) then
+		message:=''金额不正确'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -3;
+	end if;
+
+	if carLicensePlate is not null and length(carLicensePlate)>0 then
+		select count(*) into n from BAS_CAR where LICENSE_PLATE=carLicensePlate;
+		if n=0 then
+			message:=''车辆：''||carLicensePlate||''不存在'';
+			AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+			return -4;
+		end if;
+		select ID into carID from BAS_CAR where LICENSE_PLATE=carLicensePlate;
+	end if;
+
+	select count(*) into n from BAS_BOOKING where STUDENT_ID=studentID and BOOKING_EXAM_DATE=substr(bookingDatetime, 1, 8) and not exists((select * from buz_exam_info where BOOKING_ID=BAS_BOOKING.ID));
+	if n>0 then
+		message:=''预约失败，有未使用的预约'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -5;
+	end if;
+
+	bookingID:=SEQU_BAS_BOOKING_ID.nextval;
+	insert into BAS_BOOKING(
+		ID,
+		SEQUENCENUMBER,
+		SUBJECT,
+		EXAMNUMBER,
+		STUDENT_ID,
+        STUDY_TIME,
+		BOOKING_DATETIME,
+		BOOKING_TIMES,
+		BOOKING_EXAM_DATE,
+		DRIVER_LICENSE_TYPE,
+		PLACE_ID,
+		CAR_ID,
+		OPERATOR_NAME,
+		BRANCH_ADMINISTRATION,
+		SCHOOL_ID,
+		BRANCH_BUSINESS,
+		SIGN_STATUS)
+	values(
+		bookingID,
+		NewBookSequenceNumber,
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1006 and DICT_NAME=subjectName),
+		NewExamNumber,
+		studentID,
+        studyTime,
+		bookingDatetime,
+		0,
+		substr(bookingDatetime, 1, 8),
+		licenseType,
+		(select max(ID) from BAS_PLACE),
+		carID,
+		operatorLoginName,
+		''管理'',
+		(select ID from BAS_DRIVING_SCHOOL where NAME=schoolName),
+		''业务'',
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1031 and DICT_NAME=''已签到''));
+
+	tradeNumber:=NewTradeNumber;
+	currentDate:=to_char(current_date, ''yyyymmddhh24miss'');
+	insert into BUZ_PAYMENT_DETAIL(
+		ID,
+		TRADE_NO,
+		PAY_TIME,
+		OPERATOR_NAME,
+		OPERATOR_IDNUMBER,
+		STUDENT_IDNUMBER,
+		SUBJECT,
+		FEE_TYPE,
+		TIMES,
+		AMOUNT,
+		PAYMENT_WAY,
+		BOOKING_ID,
+		PRICING_STRATEGY,
+		HASH)
+	values(
+		SEQU_BUZ_PAYMENT_DETAIL_ID.nextval,
+		tradeNumber,
+		currentDate,
+		cashierName,
+		cashierIDNumber,
+		studentIDNumber,
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1006 and DICT_NAME=subjectName),
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1002 and DICT_NAME=''计次''),
+		studyTime,
+		amount,
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1001 and DICT_NAME=paymentWay),
+		bookingID,
+		message,
+		GenerateSHA1(tradeNumber||currentDate||cashierName||cashierIDNumber||studentIDNumber||studyTime||amount||bookingID||message));
+
+	commit;
+	message:=''交易序号：''||tradeNumber||chr(13)||chr(10)
+		||''交易时间：''||currentDate||chr(13)||chr(10)
+		||''收银员姓名：''||cashierName||chr(13)||chr(10)
+		||''收银员身份证号：''||cashierIDNumber||chr(13)||chr(10)
+		||''学员身份证号：''||studentIDNumber||chr(13)||chr(10)
+		||''时间（分钟）：''||studyTime||chr(13)||chr(10)
+		||''金额：''||amount||chr(13)||chr(10);
+	AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 1, hostIP, hostMAC);
+	return 0;
+end BookFromManagementByTime;';
+
+			--Views\BAS_STUDENT_VIEW;
+execute immediate 'CREATE OR REPLACE FORCE VIEW BAS_STUDENT_VIEW AS
+SELECT  
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=2002 and DICT_CODE=IDTYPE) IDTYPE_DICT_NAME,
+    IDNUMBER,
+    NAME,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=2001 and DICT_CODE=GENDER) GENDER_DICT_NAME,
+    DRIVER_LICENSE_TYPE,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=2003 and DICT_CODE=DRIVER_LICENSE_TYPE) DRIVER_LICENSE_TYPE_DICT_NAME,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=1036 and DICT_CODE=STATUS) STATUS_DICT_NAME,
+    SCHOOL_NAME,
+    ID,
+    PHOTO1,
+    PHOTO2,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID) then ''已预约'' else ''未预约'' end BOOKED,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) else null end BOOKING_TIMES,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)) else null end LEFT_TIMES,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0) then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0) else null end BOOKING_STUDY_TIME,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)
+        then
+            case when exists(select * from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+                then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+                else (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)
+            end
+        else null
+        end LEFT_STUDY_TIME,
+		CREATE_TIME,
+		UPDATE_TIME
+FROM BAS_STUDENT
+order by ID';
+			--Views\CAR_ALLOCATION_CAR_VIEW
+execute immediate 'CREATE OR REPLACE FORCE VIEW CAR_ALLOCATION_CAR_VIEW AS 
+select
+    LICENSE_PLATE,
+    CARNUMBER,
+    QUALIFIED_CAR_TYPE,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=1025 and DICT_CODE=PROCESS_TYPE) PROCESS_TYPE_DICTNAME,
+	(select ITEM_NAME from CFG_ITEMS where ITEM_CODE=EXAM_ITEM) EXAM_ITEM_DICTNAME,
+
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select SEQUENCENUMBER+1-(select min(SEQUENCENUMBER) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')) from bas_booking where ID=BOOKING.ID) 
+        else null 
+    end SEQUENCE_NUMBER,
+
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select NAME from bas_student where ID=BOOKING.STUDENT_ID) 
+        else null 
+    end STUDENT_NAME,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select IDNUMBER from bas_student where ID=BOOKING.STUDENT_ID) 
+        else null 
+    end STUDENT_IDNUMBER,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0) 
+        else null 
+    end BOOKING_TIMES,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)) 
+        else null 
+    end LEFT_TIMES,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)
+        else null
+    end BOOKING_STUDY_TIME,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then
+            case when exists(select * from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))
+                then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))
+                else (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)
+            end
+        else null
+    end LEFT_STUDY_TIME,
+    
+    USE_STATUS
+from bas_car left join (buz_exam_process PROCESS join buz_exam_info EXAM on PROCESS.EXAM_ID=EXAM.ID join bas_booking BOOKING on BOOKING.ID=EXAM.BOOKING_ID) on bas_car.ID=EXAM.CAR_ID and PROCESS.ID in (select max(ID) from buz_exam_process where EXAM_ID in (select max(ID) from buz_exam_info where substr(EXAM_START_TIME,1,8)=to_char(current_date, ''yyyymmdd'') group by CAR_ID) group by EXAM_ID)
+order by bas_car.USE_STATUS, bas_car.ID';
+			--Views\CAR_ALLOCATION_STUDENT_VIEW
+execute immediate 'CREATE OR REPLACE FORCE VIEW CAR_ALLOCATION_STUDENT_VIEW AS 
+select 
+	(select SEQUENCENUMBER+1-(select min(SEQUENCENUMBER) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')) from bas_booking where id=(select max(id) from bas_booking where STUDENT_ID=bas_student.ID and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd''))) SEQUENCE_NUMBER,
+    NAME,
+    IDNUMBER,
+    DRIVER_LICENSE_TYPE,
+    (select CARNUMBER from bas_car where ID=(select CAR_ID from bas_booking where id=(select max(id) from bas_booking where STUDENT_ID=bas_student.ID and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')))) BOOKING_CAR,
+    (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) BOOKING_TIMES,
+    (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)) LEFT_TIMES,
+    (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0) BOOKING_STUDY_TIME,
+    case when exists(select * from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+        then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+        else (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)
+    end LEFT_STUDY_TIME
+from bas_student
+where ID in (select distinct(STUDENT_ID) from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select * from buz_exam_info where BOOKING_ID=bas_booking.ID))
+order by (select min(id) from bas_booking where student_id=bas_student.id and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select *from buz_exam_info where BOOKING_ID=bas_booking.ID))';
+
+			update CFG_PARAM set PARAM_VALUE='1.0.0.4' where PARAM_NAME='DATABASE_VERSION';
+--1.0.0.3 end--
 		when '1.0.0.2' then
             dbms_output.put_line('version 1.0.0.2');
 			--Views\CAR_ALLOCATION_STUDENT_VIEW;
@@ -1695,15 +2480,1444 @@ from bas_car left join buz_exam_process on buz_exam_process.ID in (select max(ID
 order by bas_car.USE_STATUS, bas_car.ID';
 			update cfg_param set param_value=5 where param_name='CAR_ALLOCATION_INTERVAL';
 
-
-
 			update CFG_PARAM set PARAM_VALUE='1.0.0.3' where PARAM_NAME='DATABASE_VERSION';
 
+--1.0.0.3 start--
+            dbms_output.put_line('version 1.0.0.3');
+			execute immediate 'alter table bas_booking rename column study_times to STUDY_TIME';
+			execute immediate 'alter table CFG_PRICING_STRATEGY add (FEE_TYPE varchar2(8) null)';
+			execute immediate 'update CFG_PRICING_STRATEGY set FEE_TYPE=''COUNT''';
+			execute immediate 'alter table CFG_PRICING_STRATEGY modify (FEE_TYPE varchar2(8) not null)';
+			execute immediate 'insert into CFG_PRICING_STRATEGY(ID, PRIORITY, ACTION, AMOUNT, FEE_TYPE) values(SEQU_CFG_PRICING_STRATEGY_ID.nextval, 0, ''set'', 200, ''HOUR'')';
 
+			update sys_permission set name='预约计次培训' where name='预约培训';
+			update sys_permission set code='0205' where name='过程查询';
+			update sys_permission set code='0204' where name='分车叫号';
+			update sys_permission set code='0203' where name='支付流水';
+			insert into SYS_PERMISSION(CODE, NAME) values('0202', '预约计时培训');
+			insert into SYS_ROLE_PERMISSION(ROLE_ID, PERMISSION_CODE) values((select id from sys_role where name='管理员'), '0205');
+			insert into SYS_ROLE_PERMISSION(ROLE_ID, PERMISSION_CODE) values((select id from sys_role where name='收银员'), '0205');
 
+			--StoredProcedures\Query17C05School;
+execute immediate 'create or replace procedure Query17C08Book
+(
+	lsh in varchar2,		--流水号 Varchar2	13	不可空
+	kskm in varchar2,		--考试科目 Char	1	不可空	1科目一；2科目二；3科目三	
+	zkzmbh in varchar2,		--准考证明编号 Char	12	不可空	
+	sfzmmc in varchar2,		--身份证明名称 Char	1	不可空
+	sfzmhm in varchar2,		--身份证明号码 Varchar2	18	不可空
+	xm in varchar2,			--姓名 Varchar2	30	不可空
+	ksyy in varchar2,		--考试原因 Char	1	不可空
+	xxsj in number,			--学习时间 Number      可空
+	yyrq in varchar2,		--预约日期 Date        不可空 yyyymmddhhmmss
+	ykrq in varchar2,		--约考日期 Date        不可空 yyyymmdd
+	kscx in varchar2,		--考试车型 Varchar2	6	不可空
+	ksdd in varchar2,		--考试地点 Varchar2	64	不可空
+	kscc in number,			--考试场次 Number      不可空
+	kchp in varchar2,		--考试车辆号牌 Varchar2	15	可空
+	jbr in varchar2,		--经办人 Varchar2	30	不可空
+	glbm in varchar2,		--管理部门 Varchar2	12	不可空
+	dlr in varchar2,		--代理人 Varchar2	64	可空
+	ksrq in varchar2,		--考试日期 Date        可空 yyyymmdd
+	kscs in number,			--考试次数 Number      可空
+	ksy1 in varchar2,		--考试员1 Varchar2	30	可空
+	ksy2 in varchar2,		--考试员2 Varchar2	30	可空
+	zt in varchar2,			--状态 Char	1	不可空	0未考试；2考试不合格
+	pxshrq in varchar2,		--培训审核日期 Date        可空 yyyymmdd
+	sfyk in varchar2,		--是否夜考 Char	1	可空	0否；1是
+	zkykrq in varchar2,		--桩考约考日期 Date        可空 yyyymmdd
+	zksfhg in varchar2,		--桩考是否合格 Char	1	可空
+	clzl in varchar2,		--车辆种类 Varchar2	10	可空
+	jly in varchar2,		--教练员 Varchar2	30	可空
+	zkkf in number,			--桩考扣分 Number      可空
+	ckyy in varchar2,		--场考是否已约 Char	1	不可空	0未预约；1已预约
+	ywblbm in varchar2,		--业务办理部门 Varchar2	12	不可空
+	yycs in number,			--预约次数 Number	1	不可空
+	bcyykscs in number		--本次预约考试次数 Number	1	不可空
+) as
+	n number;
+	studentID BAS_STUDENT.ID%TYPE;
+begin
+	select count(*) into n from BAS_PLACE where CODE=ksdd;
+	if n=0 then
+		return;
+	end if;
+
+	select count(*) into n from BAS_STUDENT where IDNUMBER=sfzmhm;
+	if n=0 then
+		studentID:=SEQU_BAS_STUDENT_ID.nextval;
+		insert into BAS_STUDENT(
+			ID,
+			IDTYPE,
+			IDNUMBER,
+			NAME,
+			DRIVER_LICENSE_TYPE,
+			SCHOOL_NAME,
+			PASSWORD,
+			CREATE_TIME,
+			UPDATE_TIME)
+		values(
+			studentID,
+			sfzmmc,
+			sfzmhm,
+			xm,
+			kscx,
+			case when dlr is null then null else (select NAME from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			''123'',
+			to_char(current_date, ''yyyymmddhh24miss''),
+			to_char(current_date, ''yyyymmddhh24miss''));
+	else
+		update BAS_STUDENT set
+			IDTYPE=sfzmmc,
+			NAME=xm,
+			DRIVER_LICENSE_TYPE=kscx,
+			SCHOOL_NAME=case when dlr is null then null else (select NAME from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			CREATE_TIME=to_char(current_date, ''yyyymmddhh24miss''),
+			UPDATE_TIME=to_char(current_date, ''yyyymmddhh24miss'')
+		where IDNUMBER=sfzmhm;
+		select ID into studentID from BAS_STUDENT where IDNUMBER=sfzmhm;
+	end if;
+	select count(*) into n from BAS_BOOKING where SEQUENCENUMBER=lsh;
+	if n>0 then
+		update BAS_BOOKING set
+			SUBJECT=kskm,
+			EXAMNUMBER=zkzmbh,
+			STUDENT_ID=studentID,
+			EXAM_REASON=ksyy,
+			STUDY_TIME=xxsj,
+			BOOKING_DATETIME=yyrq,
+			BOOKING_TIMES=yycs,
+			BOOKING_EXAM_DATE=ykrq,
+			DRIVER_LICENSE_TYPE=kscx,
+			PLACE_ID=(select ID from BAS_PLACE where CODE=ksdd),
+			EXAM_SESSION=kscc,
+			CAR_ID=case when kchp is null then null else (select ID from BAS_CAR where LICENSE_PLATE=kchp) end,
+			OPERATOR_NAME=jbr,
+			BRANCH_ADMINISTRATION=glbm,
+			SCHOOL_ID=case when dlr is null then null else (select ID from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			EXAM_DATE=ksrq,
+			EXAM_TIMES=kscs,
+			EXAMINER1_ID=case when ksy1 is null then null else (select ID from BAS_EXAMINER where NAME=ksy1) end,
+			EXAMINER2_ID=case when ksy2 is null then null else (select ID from BAS_EXAMINER where NAME=ksy2) end,
+			EXAM_STATUS=zt,
+			TRAINING_AUDIT_DATE=pxshrq,
+			IS_NIGHT_EXAM=sfyk,
+			PILE_EXAM_BOOKING_DATE=zkykrq,
+			PILE_EXAM_STATUS=zksfhg,
+			CAR_BREED=clzl,
+			COACH=jly,
+			PILE_EXAM_DEDUCT_SCORE=zkkf,
+			IS_PLACE_EXAM=ckyy,
+			BRANCH_BUSINESS=ywblbm,
+			UPDATE_TIME=to_char(current_date,''yyyymmddhh24miss'')
+		where SEQUENCENUMBER=lsh;
+	else
+		insert into BAS_BOOKING(
+			ID,
+			SEQUENCENUMBER,
+			SUBJECT,
+			EXAMNUMBER,
+			STUDENT_ID,
+			EXAM_REASON,
+			STUDY_TIME,
+			BOOKING_DATETIME,
+			BOOKING_TIMES,
+			BOOKING_EXAM_DATE,
+			DRIVER_LICENSE_TYPE,
+			PLACE_ID,
+			EXAM_SESSION,
+			CAR_ID,
+			OPERATOR_NAME,
+			BRANCH_ADMINISTRATION,
+			SCHOOL_ID,
+			EXAM_DATE,
+			EXAM_TIMES,
+			EXAMINER1_ID,
+			EXAMINER2_ID,
+			EXAM_STATUS,
+			TRAINING_AUDIT_DATE,
+			IS_NIGHT_EXAM,
+			PILE_EXAM_BOOKING_DATE,
+			PILE_EXAM_STATUS,
+			CAR_BREED,
+			COACH,
+			PILE_EXAM_DEDUCT_SCORE,
+			IS_PLACE_EXAM,
+			BRANCH_BUSINESS,
+			UPDATE_TIME)
+		values(
+			SEQU_BAS_BOOKING_ID.nextval,
+			lsh,
+			kskm,
+			zkzmbh,
+			studentID,
+			ksyy,
+			xxsj,
+			yyrq,
+			yycs,
+			ykrq,
+			kscx,
+			(select ID from BAS_PLACE where CODE=ksdd),
+			kscc,
+			case when kchp is null then null else (select ID from BAS_CAR where LICENSE_PLATE=kchp) end,
+			jbr,
+			glbm,
+			case when dlr is null then null else (select ID from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			ksrq,
+			kscs,
+			case when ksy1 is null then null else (select ID from BAS_EXAMINER where NAME=ksy1) end,
+			case when ksy2 is null then null else (select ID from BAS_EXAMINER where NAME=ksy2) end,
+			zt,
+			pxshrq,
+			sfyk,
+			zkykrq,
+			zksfhg,
+			clzl,
+			jly,
+			zkkf,
+			ckyy,
+			ywblbm,
+			to_char(current_date,''yyyymmddhh24miss''));
+	end if;
+	commit;
+end Query17C08Book;';
+			--StoredProcedures\GetPriceByTimes;
+execute immediate 'create or replace function GetPriceByTimes
+(
+	message out varchar2,
+	times in integer,
+	startTime in varchar2,
+	schoolName in varchar2,
+	studentIDNumber in varchar2
+) return number as
+    realStartTime varchar2(14);
+	totalAmount number(8,2);
+	n integer;
+	checkSchoolName CFG_PRICING_STRATEGY.SCHOOL_NAME%TYPE;
+	checkStudentIDNumber CFG_PRICING_STRATEGY.STUDENT_IDNUMBER%TYPE;
+	cur SYS_REFCURSOR;
+    cur_rec CFG_PRICING_STRATEGY%ROWTYPE;
+	ref2 boolean;
+	flag boolean;
+	currentPriority integer;
+begin
+    if startTime is null then
+        realStartTime:=to_char(current_date, ''yyyymmddhh24miss''); 
+    else
+        realStartTime:=startTime;
+    end if;
+
+	totalAmount:=0;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where SCHOOL_NAME=schoolName;
+	if n>0 then
+		checkSchoolName:=schoolName;
+	else
+		checkSchoolName:=null;
+	end if;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where STUDENT_IDNUMBER=studentIDNumber;
+	if n>0 then
+		checkStudentIDNumber:=studentIDNumber;
+	else
+		checkStudentIDNumber:=null;
+	end if;
+	
+    open cur for select *
+		from CFG_PRICING_STRATEGY
+		where
+			FEE_TYPE=''COUNT'' and
+			(EFFECTIVE_DATE is null or EFFECTIVE_DATE<=substr(realStartTime, 1, 8)) and
+			(EXPIRED_DATE is null or substr(realStartTime, 1, 8)<=EXPIRED_DATE) and
+			(START_DATE is null or START_DATE<=substr(realStartTime, 1, 8)) and
+			(END_DATE is null or substr(realStartTime, 1, 8)<=END_DATE) and
+			(START_TIME is null or START_TIME<=substr(realStartTime, 9,6)) and
+			(END_TIME is null or substr(realStartTime, 9,6)<=END_TIME) and
+			(checkSchoolName is null or checkSchoolName=SCHOOL_NAME) and
+			(checkStudentIDNumber is null or checkStudentIDNumber=STUDENT_IDNUMBER)
+		order by PRIORITY;
+	currentPriority:=null;
+	message:='''';
+    loop
+        fetch cur into cur_rec;
+        exit when cur%NOTFOUND;
+        
+		if currentPriority=cur_rec.PRIORITY then continue;			--this priority already done
+		end if;
+		
+		ref2:=true;
+		flag:=true;
+		if cur_rec.REFERENCE_METHOD1 is not null then
+			case cur_rec.REFERENCE_METHOD1
+				when ''>'' then flag:=totalAmount>cur_rec.REFERENCE_AMOUNT1;
+				when ''='' then flag:=totalAmount=cur_rec.REFERENCE_AMOUNT1;
+				when ''<'' then flag:=totalAmount<cur_rec.REFERENCE_AMOUNT1;
+				when ''>='' then flag:=totalAmount>=cur_rec.REFERENCE_AMOUNT1;
+				when ''<='' then flag:=totalAmount<=cur_rec.REFERENCE_AMOUNT1;
+				when ''<>'' then flag:=totalAmount<>cur_rec.REFERENCE_AMOUNT1;
+				when ''!='' then flag:=totalAmount!=cur_rec.REFERENCE_AMOUNT1;
+				else flag:=true;
+			end case;
+			if cur_rec.REFERENCE_METHOD2 is not null and cur_rec.REFERENCE_RELATION is not null then
+				case cur_rec.REFERENCE_METHOD2
+					when ''>'' then ref2:=totalAmount>cur_rec.REFERENCE_AMOUNT2;
+					when ''='' then ref2:=totalAmount=cur_rec.REFERENCE_AMOUNT2;
+					when ''<'' then ref2:=totalAmount<cur_rec.REFERENCE_AMOUNT2;
+					when ''>='' then ref2:=totalAmount>=cur_rec.REFERENCE_AMOUNT2;
+					when ''<='' then ref2:=totalAmount<=cur_rec.REFERENCE_AMOUNT2;
+					when ''<>'' then ref2:=totalAmount<>cur_rec.REFERENCE_AMOUNT2;
+					when ''!='' then ref2:=totalAmount!=cur_rec.REFERENCE_AMOUNT2;
+					else ref2:=true;
+				end case;
+				if cur_rec.REFERENCE_RELATION=''||'' then flag:=flag or ref2;
+				else flag:=flag and ref2;
+				end if;
+			end if;
+		end if;
+		
+		if flag then
+			case cur_rec.ACTION
+				when ''set'' then totalAmount:=cur_rec.AMOUNT*times;
+				when ''add'' then totalAmount:=totalAmount+cur_rec.AMOUNT;
+				when ''sub'' then totalAmount:=totalAmount-cur_rec.AMOUNT;
+				when ''mul'' then totalAmount:=totalAmount*cur_rec.AMOUNT;
+				when ''div'' then totalAmount:=totalAmount/cur_rec.AMOUNT;
+				else null;
+			end case;
+			currentPriority:=cur_rec.PRIORITY;
+			if length(message)>0 then message:=message||'';''||chr(13)||chr(10); end if;
+			message:=message||''COUNT, ''||''priority: ''||cur_rec.PRIORITY||'' ''||cur_rec.ACTION||'' ''||cur_rec.AMOUNT
+				||'' effect on: ''||case when cur_rec.EFFECTIVE_DATE is null then ''now'' else cur_rec.EFFECTIVE_DATE end
+				||'' to ''||case when cur_rec.EXPIRED_DATE is null then ''forever'' else cur_rec.EXPIRED_DATE end||'' ''
+				||case when cur_rec.REFERENCE_METHOD1 is null then '''' else '' when ''||cur_rec.REFERENCE_METHOD1||cur_rec.REFERENCE_AMOUNT1||case when cur_rec.REFERENCE_METHOD2 is null then '''' else cur_rec.REFERENCE_RELATION||cur_rec.REFERENCE_METHOD2||cur_rec.REFERENCE_AMOUNT2 end end
+				||'' at ''||case when cur_rec.START_TIME is null then ''000000'' else cur_rec.START_TIME end
+				||''-''||case when cur_rec.END_TIME is null then ''235959'' else cur_rec.END_TIME end
+				||'' from ''||case when cur_rec.START_DATE is null then ''now'' else cur_rec.START_DATE end
+				||'' to ''||case when cur_rec.START_DATE is null then ''forever'' else cur_rec.START_DATE end
+				||case when cur_rec.SCHOOL_NAME is null then '''' else '' for school: ''||cur_rec.SCHOOL_NAME end
+				||case when cur_rec.STUDENT_IDNUMBER is null then '''' else '' for student: ''||cur_rec.STUDENT_IDNUMBER end;
+		end if;
+	end loop;
+	return totalAmount;
+end GetPriceByTimes;';
+
+			--StoredProcedures\GetPriceByTime;
+execute immediate 'create or replace function GetPriceByTime
+(
+	message out varchar2,
+	studyTime in integer,
+	startTime in varchar2,
+	schoolName in varchar2,
+	studentIDNumber in varchar2
+) return number as
+    realStartTime varchar2(14);
+	totalAmount number(8,2);
+	n integer;
+	checkSchoolName CFG_PRICING_STRATEGY.SCHOOL_NAME%TYPE;
+	checkStudentIDNumber CFG_PRICING_STRATEGY.STUDENT_IDNUMBER%TYPE;
+	cur SYS_REFCURSOR;
+    cur_rec CFG_PRICING_STRATEGY%ROWTYPE;
+	ref2 boolean;
+	flag boolean;
+	currentPriority integer;
+begin
+    if startTime is null then
+        realStartTime:=to_char(current_date, ''yyyymmddhh24miss''); 
+    else
+        realStartTime:=startTime;
+    end if;
+
+	totalAmount:=0;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where SCHOOL_NAME=schoolName;
+	if n>0 then
+		checkSchoolName:=schoolName;
+	else
+		checkSchoolName:=null;
+	end if;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where STUDENT_IDNUMBER=studentIDNumber;
+	if n>0 then
+		checkStudentIDNumber:=studentIDNumber;
+	else
+		checkStudentIDNumber:=null;
+	end if;
+	
+    open cur for select *
+		from CFG_PRICING_STRATEGY
+		where
+			FEE_TYPE=''HOUR'' and
+			(EFFECTIVE_DATE is null or EFFECTIVE_DATE<=substr(realStartTime, 1, 8)) and
+			(EXPIRED_DATE is null or substr(realStartTime, 1, 8)<=EXPIRED_DATE) and
+			(START_DATE is null or START_DATE<=substr(realStartTime, 1, 8)) and
+			(END_DATE is null or substr(realStartTime, 1, 8)<=END_DATE) and
+			(START_TIME is null or START_TIME<=substr(realStartTime, 9,6)) and
+			(END_TIME is null or substr(realStartTime, 9,6)<=END_TIME) and
+			(checkSchoolName is null or checkSchoolName=SCHOOL_NAME) and
+			(checkStudentIDNumber is null or checkStudentIDNumber=STUDENT_IDNUMBER)
+		order by PRIORITY;
+	currentPriority:=null;
+	message:='''';
+    loop
+        fetch cur into cur_rec;
+        exit when cur%NOTFOUND;
+        
+		if currentPriority=cur_rec.PRIORITY then continue;			--this priority already done
+		end if;
+		
+		ref2:=true;
+		flag:=true;
+		if cur_rec.REFERENCE_METHOD1 is not null then
+			case cur_rec.REFERENCE_METHOD1
+				when ''>'' then flag:=totalAmount>cur_rec.REFERENCE_AMOUNT1;
+				when ''='' then flag:=totalAmount=cur_rec.REFERENCE_AMOUNT1;
+				when ''<'' then flag:=totalAmount<cur_rec.REFERENCE_AMOUNT1;
+				when ''>='' then flag:=totalAmount>=cur_rec.REFERENCE_AMOUNT1;
+				when ''<='' then flag:=totalAmount<=cur_rec.REFERENCE_AMOUNT1;
+				when ''<>'' then flag:=totalAmount<>cur_rec.REFERENCE_AMOUNT1;
+				when ''!='' then flag:=totalAmount!=cur_rec.REFERENCE_AMOUNT1;
+				else flag:=true;
+			end case;
+			if cur_rec.REFERENCE_METHOD2 is not null and cur_rec.REFERENCE_RELATION is not null then
+				case cur_rec.REFERENCE_METHOD2
+					when ''>'' then ref2:=totalAmount>cur_rec.REFERENCE_AMOUNT2;
+					when ''='' then ref2:=totalAmount=cur_rec.REFERENCE_AMOUNT2;
+					when ''<'' then ref2:=totalAmount<cur_rec.REFERENCE_AMOUNT2;
+					when ''>='' then ref2:=totalAmount>=cur_rec.REFERENCE_AMOUNT2;
+					when ''<='' then ref2:=totalAmount<=cur_rec.REFERENCE_AMOUNT2;
+					when ''<>'' then ref2:=totalAmount<>cur_rec.REFERENCE_AMOUNT2;
+					when ''!='' then ref2:=totalAmount!=cur_rec.REFERENCE_AMOUNT2;
+					else ref2:=true;
+				end case;
+				if cur_rec.REFERENCE_RELATION=''||'' then flag:=flag or ref2;
+				else flag:=flag and ref2;
+				end if;
+			end if;
+		end if;
+		
+		if flag then
+			case cur_rec.ACTION
+				when ''set'' then totalAmount:=cur_rec.AMOUNT*studyTime/60;
+				when ''add'' then totalAmount:=totalAmount+cur_rec.AMOUNT;
+				when ''sub'' then totalAmount:=totalAmount-cur_rec.AMOUNT;
+				when ''mul'' then totalAmount:=totalAmount*cur_rec.AMOUNT;
+				when ''div'' then totalAmount:=totalAmount/cur_rec.AMOUNT;
+				else null;
+			end case;
+			currentPriority:=cur_rec.PRIORITY;
+			if length(message)>0 then message:=message||'';''||chr(13)||chr(10); end if;
+			message:=message||''HOUR, ''||''priority: ''||cur_rec.PRIORITY||'' ''||cur_rec.ACTION||'' ''||cur_rec.AMOUNT
+				||'' effect on: ''||case when cur_rec.EFFECTIVE_DATE is null then ''now'' else cur_rec.EFFECTIVE_DATE end
+				||'' to ''||case when cur_rec.EXPIRED_DATE is null then ''forever'' else cur_rec.EXPIRED_DATE end||'' ''
+				||case when cur_rec.REFERENCE_METHOD1 is null then '''' else '' when ''||cur_rec.REFERENCE_METHOD1||cur_rec.REFERENCE_AMOUNT1||case when cur_rec.REFERENCE_METHOD2 is null then '''' else cur_rec.REFERENCE_RELATION||cur_rec.REFERENCE_METHOD2||cur_rec.REFERENCE_AMOUNT2 end end
+				||'' at ''||case when cur_rec.START_TIME is null then ''000000'' else cur_rec.START_TIME end
+				||''-''||case when cur_rec.END_TIME is null then ''235959'' else cur_rec.END_TIME end
+				||'' from ''||case when cur_rec.START_DATE is null then ''now'' else cur_rec.START_DATE end
+				||'' to ''||case when cur_rec.START_DATE is null then ''forever'' else cur_rec.START_DATE end
+				||case when cur_rec.SCHOOL_NAME is null then '''' else '' for school: ''||cur_rec.SCHOOL_NAME end
+				||case when cur_rec.STUDENT_IDNUMBER is null then '''' else '' for student: ''||cur_rec.STUDENT_IDNUMBER end;
+		end if;
+	end loop;
+	return totalAmount;
+end GetPriceByTime;';
+			--StoredProcedures\BookFromManagementByTime;
+execute immediate 'create or replace function BookFromManagementByTime
+(
+	message out varchar2,
+	operatorLoginName in varchar2,
+	studentIDNumber in BAS_STUDENT.IDNUMBER%TYPE,
+	subjectName in varchar2,
+	studyTime in integer,
+	amount in number,
+	paymentWay in CFG_DICT.DICT_NAME%TYPE,
+	bookingDatetime in BAS_BOOKING.BOOKING_DATETIME%TYPE,
+	carLicensePlate in BAS_CAR.LICENSE_PLATE%TYPE,
+	cashierName in varchar2,
+	cashierIDNumber in varchar2,
+	hostIP in varchar2,					--host ip
+	hostMAC in varchar2					--host mac
+) return integer as
+	n integer;
+	studentID BAS_STUDENT.ID%TYPE;
+	licenseType BAS_STUDENT.DRIVER_LICENSE_TYPE%TYPE;
+	schoolName BAS_DRIVING_SCHOOL.NAME%TYPE;
+	carID BAS_CAR.ID%TYPE;
+	bookingID BAS_BOOKING.ID%TYPE;
+	tradeNumber BUZ_PAYMENT_DETAIL.TRADE_NO%TYPE;
+	currentDate BAS_BOOKING.BOOKING_DATETIME%TYPE;
+begin
+	select count(*) into n from SYS_USER where LOGIN_NAME=operatorLoginName;
+	if n=0 then
+		message:=''操作员：''||operatorLoginName||''不存在'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -1;
+	end if;
+
+	select count(*) into n from BAS_STUDENT where IDNUMBER=studentIDNumber;
+	if n=0 then
+		message:=''学员：''||studentIDNumber||''不存在'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -2;
+	end if;
+	select ID, DRIVER_LICENSE_TYPE, SCHOOL_NAME into studentID, licenseType, schoolName from BAS_STUDENT where IDNUMBER=studentIDNumber;
+
+	if amount<>GetPriceByTime(message, studyTime, bookingDatetime, schoolName, studentIDNumber) then
+		message:=''金额不正确'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -3;
+	end if;
+
+	if carLicensePlate is not null and length(carLicensePlate)>0 then
+		select count(*) into n from BAS_CAR where LICENSE_PLATE=carLicensePlate;
+		if n=0 then
+			message:=''车辆：''||carLicensePlate||''不存在'';
+			AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+			return -4;
+		end if;
+		select ID into carID from BAS_CAR where LICENSE_PLATE=carLicensePlate;
+	end if;
+
+	select count(*) into n from BAS_BOOKING where STUDENT_ID=studentID and BOOKING_EXAM_DATE=substr(bookingDatetime, 1, 8) and not exists((select * from buz_exam_info where BOOKING_ID=BAS_BOOKING.ID));
+	if n>0 then
+		message:=''预约失败，有未使用的预约'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -5;
+	end if;
+
+	bookingID:=SEQU_BAS_BOOKING_ID.nextval;
+	insert into BAS_BOOKING(
+		ID,
+		SEQUENCENUMBER,
+		SUBJECT,
+		EXAMNUMBER,
+		STUDENT_ID,
+        STUDY_TIME,
+		BOOKING_DATETIME,
+		BOOKING_TIMES,
+		BOOKING_EXAM_DATE,
+		DRIVER_LICENSE_TYPE,
+		PLACE_ID,
+		CAR_ID,
+		OPERATOR_NAME,
+		BRANCH_ADMINISTRATION,
+		SCHOOL_ID,
+		BRANCH_BUSINESS,
+		SIGN_STATUS)
+	values(
+		bookingID,
+		NewBookSequenceNumber,
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1006 and DICT_NAME=subjectName),
+		NewExamNumber,
+		studentID,
+        studyTime,
+		bookingDatetime,
+		0,
+		substr(bookingDatetime, 1, 8),
+		licenseType,
+		(select max(ID) from BAS_PLACE),
+		carID,
+		operatorLoginName,
+		''管理'',
+		(select ID from BAS_DRIVING_SCHOOL where NAME=schoolName),
+		''业务'',
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1031 and DICT_NAME=''已签到''));
+
+	tradeNumber:=NewTradeNumber;
+	currentDate:=to_char(current_date, ''yyyymmddhh24miss'');
+	insert into BUZ_PAYMENT_DETAIL(
+		ID,
+		TRADE_NO,
+		PAY_TIME,
+		OPERATOR_NAME,
+		OPERATOR_IDNUMBER,
+		STUDENT_IDNUMBER,
+		SUBJECT,
+		FEE_TYPE,
+		TIMES,
+		AMOUNT,
+		PAYMENT_WAY,
+		BOOKING_ID,
+		PRICING_STRATEGY,
+		HASH)
+	values(
+		SEQU_BUZ_PAYMENT_DETAIL_ID.nextval,
+		tradeNumber,
+		currentDate,
+		cashierName,
+		cashierIDNumber,
+		studentIDNumber,
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1006 and DICT_NAME=subjectName),
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1002 and DICT_NAME=''计次''),
+		studyTime,
+		amount,
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1001 and DICT_NAME=paymentWay),
+		bookingID,
+		message,
+		GenerateSHA1(tradeNumber||currentDate||cashierName||cashierIDNumber||studentIDNumber||studyTime||amount||bookingID||message));
+
+	commit;
+	message:=''交易序号：''||tradeNumber||chr(13)||chr(10)
+		||''交易时间：''||currentDate||chr(13)||chr(10)
+		||''收银员姓名：''||cashierName||chr(13)||chr(10)
+		||''收银员身份证号：''||cashierIDNumber||chr(13)||chr(10)
+		||''学员身份证号：''||studentIDNumber||chr(13)||chr(10)
+		||''时间（分钟）：''||studyTime||chr(13)||chr(10)
+		||''金额：''||amount||chr(13)||chr(10);
+	AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 1, hostIP, hostMAC);
+	return 0;
+end BookFromManagementByTime;';
+
+			--Views\BAS_STUDENT_VIEW;
+execute immediate 'CREATE OR REPLACE FORCE VIEW BAS_STUDENT_VIEW AS
+SELECT  
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=2002 and DICT_CODE=IDTYPE) IDTYPE_DICT_NAME,
+    IDNUMBER,
+    NAME,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=2001 and DICT_CODE=GENDER) GENDER_DICT_NAME,
+    DRIVER_LICENSE_TYPE,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=2003 and DICT_CODE=DRIVER_LICENSE_TYPE) DRIVER_LICENSE_TYPE_DICT_NAME,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=1036 and DICT_CODE=STATUS) STATUS_DICT_NAME,
+    SCHOOL_NAME,
+    ID,
+    PHOTO1,
+    PHOTO2,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID) then ''已预约'' else ''未预约'' end BOOKED,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) else null end BOOKING_TIMES,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)) else null end LEFT_TIMES,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0) then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0) else null end BOOKING_STUDY_TIME,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)
+        then
+            case when exists(select * from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+                then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+                else (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)
+            end
+        else null
+        end LEFT_STUDY_TIME,
+		CREATE_TIME,
+		UPDATE_TIME
+FROM BAS_STUDENT
+order by ID';
+			--Views\CAR_ALLOCATION_CAR_VIEW
+execute immediate 'CREATE OR REPLACE FORCE VIEW CAR_ALLOCATION_CAR_VIEW AS 
+select
+    LICENSE_PLATE,
+    CARNUMBER,
+    QUALIFIED_CAR_TYPE,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=1025 and DICT_CODE=PROCESS_TYPE) PROCESS_TYPE_DICTNAME,
+	(select ITEM_NAME from CFG_ITEMS where ITEM_CODE=EXAM_ITEM) EXAM_ITEM_DICTNAME,
+
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select SEQUENCENUMBER+1-(select min(SEQUENCENUMBER) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')) from bas_booking where ID=BOOKING.ID) 
+        else null 
+    end SEQUENCE_NUMBER,
+
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select NAME from bas_student where ID=BOOKING.STUDENT_ID) 
+        else null 
+    end STUDENT_NAME,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select IDNUMBER from bas_student where ID=BOOKING.STUDENT_ID) 
+        else null 
+    end STUDENT_IDNUMBER,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0) 
+        else null 
+    end BOOKING_TIMES,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)) 
+        else null 
+    end LEFT_TIMES,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)
+        else null
+    end BOOKING_STUDY_TIME,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then
+            case when exists(select * from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))
+                then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))
+                else (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)
+            end
+        else null
+    end LEFT_STUDY_TIME,
+    
+    USE_STATUS
+from bas_car left join (buz_exam_process PROCESS join buz_exam_info EXAM on PROCESS.EXAM_ID=EXAM.ID join bas_booking BOOKING on BOOKING.ID=EXAM.BOOKING_ID) on bas_car.ID=EXAM.CAR_ID and PROCESS.ID in (select max(ID) from buz_exam_process where EXAM_ID in (select max(ID) from buz_exam_info where substr(EXAM_START_TIME,1,8)=to_char(current_date, ''yyyymmdd'') group by CAR_ID) group by EXAM_ID)
+order by bas_car.USE_STATUS, bas_car.ID';
+			--Views\CAR_ALLOCATION_STUDENT_VIEW
+execute immediate 'CREATE OR REPLACE FORCE VIEW CAR_ALLOCATION_STUDENT_VIEW AS 
+select 
+	(select SEQUENCENUMBER+1-(select min(SEQUENCENUMBER) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')) from bas_booking where id=(select max(id) from bas_booking where STUDENT_ID=bas_student.ID and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd''))) SEQUENCE_NUMBER,
+    NAME,
+    IDNUMBER,
+    DRIVER_LICENSE_TYPE,
+    (select CARNUMBER from bas_car where ID=(select CAR_ID from bas_booking where id=(select max(id) from bas_booking where STUDENT_ID=bas_student.ID and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')))) BOOKING_CAR,
+    (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) BOOKING_TIMES,
+    (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)) LEFT_TIMES,
+    (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0) BOOKING_STUDY_TIME,
+    case when exists(select * from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+        then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+        else (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)
+    end LEFT_STUDY_TIME
+from bas_student
+where ID in (select distinct(STUDENT_ID) from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select * from buz_exam_info where BOOKING_ID=bas_booking.ID))
+order by (select min(id) from bas_booking where student_id=bas_student.id and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select *from buz_exam_info where BOOKING_ID=bas_booking.ID))';
+
+			update CFG_PARAM set PARAM_VALUE='1.0.0.4' where PARAM_NAME='DATABASE_VERSION';
+--1.0.0.3 end--
 
 		when '1.0.0.3' then
             dbms_output.put_line('version 1.0.0.3');
+			execute immediate 'alter table bas_booking rename column study_times to STUDY_TIME';
+			execute immediate 'alter table CFG_PRICING_STRATEGY add (FEE_TYPE varchar2(8) null)';
+			execute immediate 'update CFG_PRICING_STRATEGY set FEE_TYPE=''COUNT''';
+			execute immediate 'alter table CFG_PRICING_STRATEGY modify (FEE_TYPE varchar2(8) not null)';
+			execute immediate 'insert into CFG_PRICING_STRATEGY(ID, PRIORITY, ACTION, AMOUNT, FEE_TYPE) values(SEQU_CFG_PRICING_STRATEGY_ID.nextval, 0, ''set'', 200, ''HOUR'')';
+
+			update sys_permission set name='预约计次培训' where name='预约培训';
+			update sys_permission set code='0205' where name='过程查询';
+			update sys_permission set code='0204' where name='分车叫号';
+			update sys_permission set code='0203' where name='支付流水';
+			insert into SYS_PERMISSION(CODE, NAME) values('0202', '预约计时培训');
+			insert into SYS_ROLE_PERMISSION(ROLE_ID, PERMISSION_CODE) values((select id from sys_role where name='管理员'), '0205');
+			insert into SYS_ROLE_PERMISSION(ROLE_ID, PERMISSION_CODE) values((select id from sys_role where name='收银员'), '0205');
+
+			--StoredProcedures\Query17C05School;
+execute immediate 'create or replace procedure Query17C08Book
+(
+	lsh in varchar2,		--流水号 Varchar2	13	不可空
+	kskm in varchar2,		--考试科目 Char	1	不可空	1科目一；2科目二；3科目三	
+	zkzmbh in varchar2,		--准考证明编号 Char	12	不可空	
+	sfzmmc in varchar2,		--身份证明名称 Char	1	不可空
+	sfzmhm in varchar2,		--身份证明号码 Varchar2	18	不可空
+	xm in varchar2,			--姓名 Varchar2	30	不可空
+	ksyy in varchar2,		--考试原因 Char	1	不可空
+	xxsj in number,			--学习时间 Number      可空
+	yyrq in varchar2,		--预约日期 Date        不可空 yyyymmddhhmmss
+	ykrq in varchar2,		--约考日期 Date        不可空 yyyymmdd
+	kscx in varchar2,		--考试车型 Varchar2	6	不可空
+	ksdd in varchar2,		--考试地点 Varchar2	64	不可空
+	kscc in number,			--考试场次 Number      不可空
+	kchp in varchar2,		--考试车辆号牌 Varchar2	15	可空
+	jbr in varchar2,		--经办人 Varchar2	30	不可空
+	glbm in varchar2,		--管理部门 Varchar2	12	不可空
+	dlr in varchar2,		--代理人 Varchar2	64	可空
+	ksrq in varchar2,		--考试日期 Date        可空 yyyymmdd
+	kscs in number,			--考试次数 Number      可空
+	ksy1 in varchar2,		--考试员1 Varchar2	30	可空
+	ksy2 in varchar2,		--考试员2 Varchar2	30	可空
+	zt in varchar2,			--状态 Char	1	不可空	0未考试；2考试不合格
+	pxshrq in varchar2,		--培训审核日期 Date        可空 yyyymmdd
+	sfyk in varchar2,		--是否夜考 Char	1	可空	0否；1是
+	zkykrq in varchar2,		--桩考约考日期 Date        可空 yyyymmdd
+	zksfhg in varchar2,		--桩考是否合格 Char	1	可空
+	clzl in varchar2,		--车辆种类 Varchar2	10	可空
+	jly in varchar2,		--教练员 Varchar2	30	可空
+	zkkf in number,			--桩考扣分 Number      可空
+	ckyy in varchar2,		--场考是否已约 Char	1	不可空	0未预约；1已预约
+	ywblbm in varchar2,		--业务办理部门 Varchar2	12	不可空
+	yycs in number,			--预约次数 Number	1	不可空
+	bcyykscs in number		--本次预约考试次数 Number	1	不可空
+) as
+	n number;
+	studentID BAS_STUDENT.ID%TYPE;
+begin
+	select count(*) into n from BAS_PLACE where CODE=ksdd;
+	if n=0 then
+		return;
+	end if;
+
+	select count(*) into n from BAS_STUDENT where IDNUMBER=sfzmhm;
+	if n=0 then
+		studentID:=SEQU_BAS_STUDENT_ID.nextval;
+		insert into BAS_STUDENT(
+			ID,
+			IDTYPE,
+			IDNUMBER,
+			NAME,
+			DRIVER_LICENSE_TYPE,
+			SCHOOL_NAME,
+			PASSWORD,
+			CREATE_TIME,
+			UPDATE_TIME)
+		values(
+			studentID,
+			sfzmmc,
+			sfzmhm,
+			xm,
+			kscx,
+			case when dlr is null then null else (select NAME from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			''123'',
+			to_char(current_date, ''yyyymmddhh24miss''),
+			to_char(current_date, ''yyyymmddhh24miss''));
+	else
+		update BAS_STUDENT set
+			IDTYPE=sfzmmc,
+			NAME=xm,
+			DRIVER_LICENSE_TYPE=kscx,
+			SCHOOL_NAME=case when dlr is null then null else (select NAME from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			CREATE_TIME=to_char(current_date, ''yyyymmddhh24miss''),
+			UPDATE_TIME=to_char(current_date, ''yyyymmddhh24miss'')
+		where IDNUMBER=sfzmhm;
+		select ID into studentID from BAS_STUDENT where IDNUMBER=sfzmhm;
+	end if;
+	select count(*) into n from BAS_BOOKING where SEQUENCENUMBER=lsh;
+	if n>0 then
+		update BAS_BOOKING set
+			SUBJECT=kskm,
+			EXAMNUMBER=zkzmbh,
+			STUDENT_ID=studentID,
+			EXAM_REASON=ksyy,
+			STUDY_TIME=xxsj,
+			BOOKING_DATETIME=yyrq,
+			BOOKING_TIMES=yycs,
+			BOOKING_EXAM_DATE=ykrq,
+			DRIVER_LICENSE_TYPE=kscx,
+			PLACE_ID=(select ID from BAS_PLACE where CODE=ksdd),
+			EXAM_SESSION=kscc,
+			CAR_ID=case when kchp is null then null else (select ID from BAS_CAR where LICENSE_PLATE=kchp) end,
+			OPERATOR_NAME=jbr,
+			BRANCH_ADMINISTRATION=glbm,
+			SCHOOL_ID=case when dlr is null then null else (select ID from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			EXAM_DATE=ksrq,
+			EXAM_TIMES=kscs,
+			EXAMINER1_ID=case when ksy1 is null then null else (select ID from BAS_EXAMINER where NAME=ksy1) end,
+			EXAMINER2_ID=case when ksy2 is null then null else (select ID from BAS_EXAMINER where NAME=ksy2) end,
+			EXAM_STATUS=zt,
+			TRAINING_AUDIT_DATE=pxshrq,
+			IS_NIGHT_EXAM=sfyk,
+			PILE_EXAM_BOOKING_DATE=zkykrq,
+			PILE_EXAM_STATUS=zksfhg,
+			CAR_BREED=clzl,
+			COACH=jly,
+			PILE_EXAM_DEDUCT_SCORE=zkkf,
+			IS_PLACE_EXAM=ckyy,
+			BRANCH_BUSINESS=ywblbm,
+			UPDATE_TIME=to_char(current_date,''yyyymmddhh24miss'')
+		where SEQUENCENUMBER=lsh;
+	else
+		insert into BAS_BOOKING(
+			ID,
+			SEQUENCENUMBER,
+			SUBJECT,
+			EXAMNUMBER,
+			STUDENT_ID,
+			EXAM_REASON,
+			STUDY_TIME,
+			BOOKING_DATETIME,
+			BOOKING_TIMES,
+			BOOKING_EXAM_DATE,
+			DRIVER_LICENSE_TYPE,
+			PLACE_ID,
+			EXAM_SESSION,
+			CAR_ID,
+			OPERATOR_NAME,
+			BRANCH_ADMINISTRATION,
+			SCHOOL_ID,
+			EXAM_DATE,
+			EXAM_TIMES,
+			EXAMINER1_ID,
+			EXAMINER2_ID,
+			EXAM_STATUS,
+			TRAINING_AUDIT_DATE,
+			IS_NIGHT_EXAM,
+			PILE_EXAM_BOOKING_DATE,
+			PILE_EXAM_STATUS,
+			CAR_BREED,
+			COACH,
+			PILE_EXAM_DEDUCT_SCORE,
+			IS_PLACE_EXAM,
+			BRANCH_BUSINESS,
+			UPDATE_TIME)
+		values(
+			SEQU_BAS_BOOKING_ID.nextval,
+			lsh,
+			kskm,
+			zkzmbh,
+			studentID,
+			ksyy,
+			xxsj,
+			yyrq,
+			yycs,
+			ykrq,
+			kscx,
+			(select ID from BAS_PLACE where CODE=ksdd),
+			kscc,
+			case when kchp is null then null else (select ID from BAS_CAR where LICENSE_PLATE=kchp) end,
+			jbr,
+			glbm,
+			case when dlr is null then null else (select ID from BAS_DRIVING_SCHOOL where CODE=dlr) end,
+			ksrq,
+			kscs,
+			case when ksy1 is null then null else (select ID from BAS_EXAMINER where NAME=ksy1) end,
+			case when ksy2 is null then null else (select ID from BAS_EXAMINER where NAME=ksy2) end,
+			zt,
+			pxshrq,
+			sfyk,
+			zkykrq,
+			zksfhg,
+			clzl,
+			jly,
+			zkkf,
+			ckyy,
+			ywblbm,
+			to_char(current_date,''yyyymmddhh24miss''));
+	end if;
+	commit;
+end Query17C08Book;';
+			--StoredProcedures\GetPriceByTimes;
+execute immediate 'create or replace function GetPriceByTimes
+(
+	message out varchar2,
+	times in integer,
+	startTime in varchar2,
+	schoolName in varchar2,
+	studentIDNumber in varchar2
+) return number as
+    realStartTime varchar2(14);
+	totalAmount number(8,2);
+	n integer;
+	checkSchoolName CFG_PRICING_STRATEGY.SCHOOL_NAME%TYPE;
+	checkStudentIDNumber CFG_PRICING_STRATEGY.STUDENT_IDNUMBER%TYPE;
+	cur SYS_REFCURSOR;
+    cur_rec CFG_PRICING_STRATEGY%ROWTYPE;
+	ref2 boolean;
+	flag boolean;
+	currentPriority integer;
+begin
+    if startTime is null then
+        realStartTime:=to_char(current_date, ''yyyymmddhh24miss''); 
+    else
+        realStartTime:=startTime;
+    end if;
+
+	totalAmount:=0;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where SCHOOL_NAME=schoolName;
+	if n>0 then
+		checkSchoolName:=schoolName;
+	else
+		checkSchoolName:=null;
+	end if;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where STUDENT_IDNUMBER=studentIDNumber;
+	if n>0 then
+		checkStudentIDNumber:=studentIDNumber;
+	else
+		checkStudentIDNumber:=null;
+	end if;
+	
+    open cur for select *
+		from CFG_PRICING_STRATEGY
+		where
+			FEE_TYPE=''COUNT'' and
+			(EFFECTIVE_DATE is null or EFFECTIVE_DATE<=substr(realStartTime, 1, 8)) and
+			(EXPIRED_DATE is null or substr(realStartTime, 1, 8)<=EXPIRED_DATE) and
+			(START_DATE is null or START_DATE<=substr(realStartTime, 1, 8)) and
+			(END_DATE is null or substr(realStartTime, 1, 8)<=END_DATE) and
+			(START_TIME is null or START_TIME<=substr(realStartTime, 9,6)) and
+			(END_TIME is null or substr(realStartTime, 9,6)<=END_TIME) and
+			(checkSchoolName is null or checkSchoolName=SCHOOL_NAME) and
+			(checkStudentIDNumber is null or checkStudentIDNumber=STUDENT_IDNUMBER)
+		order by PRIORITY;
+	currentPriority:=null;
+	message:='''';
+    loop
+        fetch cur into cur_rec;
+        exit when cur%NOTFOUND;
+        
+		if currentPriority=cur_rec.PRIORITY then continue;			--this priority already done
+		end if;
+		
+		ref2:=true;
+		flag:=true;
+		if cur_rec.REFERENCE_METHOD1 is not null then
+			case cur_rec.REFERENCE_METHOD1
+				when ''>'' then flag:=totalAmount>cur_rec.REFERENCE_AMOUNT1;
+				when ''='' then flag:=totalAmount=cur_rec.REFERENCE_AMOUNT1;
+				when ''<'' then flag:=totalAmount<cur_rec.REFERENCE_AMOUNT1;
+				when ''>='' then flag:=totalAmount>=cur_rec.REFERENCE_AMOUNT1;
+				when ''<='' then flag:=totalAmount<=cur_rec.REFERENCE_AMOUNT1;
+				when ''<>'' then flag:=totalAmount<>cur_rec.REFERENCE_AMOUNT1;
+				when ''!='' then flag:=totalAmount!=cur_rec.REFERENCE_AMOUNT1;
+				else flag:=true;
+			end case;
+			if cur_rec.REFERENCE_METHOD2 is not null and cur_rec.REFERENCE_RELATION is not null then
+				case cur_rec.REFERENCE_METHOD2
+					when ''>'' then ref2:=totalAmount>cur_rec.REFERENCE_AMOUNT2;
+					when ''='' then ref2:=totalAmount=cur_rec.REFERENCE_AMOUNT2;
+					when ''<'' then ref2:=totalAmount<cur_rec.REFERENCE_AMOUNT2;
+					when ''>='' then ref2:=totalAmount>=cur_rec.REFERENCE_AMOUNT2;
+					when ''<='' then ref2:=totalAmount<=cur_rec.REFERENCE_AMOUNT2;
+					when ''<>'' then ref2:=totalAmount<>cur_rec.REFERENCE_AMOUNT2;
+					when ''!='' then ref2:=totalAmount!=cur_rec.REFERENCE_AMOUNT2;
+					else ref2:=true;
+				end case;
+				if cur_rec.REFERENCE_RELATION=''||'' then flag:=flag or ref2;
+				else flag:=flag and ref2;
+				end if;
+			end if;
+		end if;
+		
+		if flag then
+			case cur_rec.ACTION
+				when ''set'' then totalAmount:=cur_rec.AMOUNT*times;
+				when ''add'' then totalAmount:=totalAmount+cur_rec.AMOUNT;
+				when ''sub'' then totalAmount:=totalAmount-cur_rec.AMOUNT;
+				when ''mul'' then totalAmount:=totalAmount*cur_rec.AMOUNT;
+				when ''div'' then totalAmount:=totalAmount/cur_rec.AMOUNT;
+				else null;
+			end case;
+			currentPriority:=cur_rec.PRIORITY;
+			if length(message)>0 then message:=message||'';''||chr(13)||chr(10); end if;
+			message:=message||''COUNT, ''||''priority: ''||cur_rec.PRIORITY||'' ''||cur_rec.ACTION||'' ''||cur_rec.AMOUNT
+				||'' effect on: ''||case when cur_rec.EFFECTIVE_DATE is null then ''now'' else cur_rec.EFFECTIVE_DATE end
+				||'' to ''||case when cur_rec.EXPIRED_DATE is null then ''forever'' else cur_rec.EXPIRED_DATE end||'' ''
+				||case when cur_rec.REFERENCE_METHOD1 is null then '''' else '' when ''||cur_rec.REFERENCE_METHOD1||cur_rec.REFERENCE_AMOUNT1||case when cur_rec.REFERENCE_METHOD2 is null then '''' else cur_rec.REFERENCE_RELATION||cur_rec.REFERENCE_METHOD2||cur_rec.REFERENCE_AMOUNT2 end end
+				||'' at ''||case when cur_rec.START_TIME is null then ''000000'' else cur_rec.START_TIME end
+				||''-''||case when cur_rec.END_TIME is null then ''235959'' else cur_rec.END_TIME end
+				||'' from ''||case when cur_rec.START_DATE is null then ''now'' else cur_rec.START_DATE end
+				||'' to ''||case when cur_rec.START_DATE is null then ''forever'' else cur_rec.START_DATE end
+				||case when cur_rec.SCHOOL_NAME is null then '''' else '' for school: ''||cur_rec.SCHOOL_NAME end
+				||case when cur_rec.STUDENT_IDNUMBER is null then '''' else '' for student: ''||cur_rec.STUDENT_IDNUMBER end;
+		end if;
+	end loop;
+	return totalAmount;
+end GetPriceByTimes;';
+
+			--StoredProcedures\GetPriceByTime;
+execute immediate 'create or replace function GetPriceByTime
+(
+	message out varchar2,
+	studyTime in integer,
+	startTime in varchar2,
+	schoolName in varchar2,
+	studentIDNumber in varchar2
+) return number as
+    realStartTime varchar2(14);
+	totalAmount number(8,2);
+	n integer;
+	checkSchoolName CFG_PRICING_STRATEGY.SCHOOL_NAME%TYPE;
+	checkStudentIDNumber CFG_PRICING_STRATEGY.STUDENT_IDNUMBER%TYPE;
+	cur SYS_REFCURSOR;
+    cur_rec CFG_PRICING_STRATEGY%ROWTYPE;
+	ref2 boolean;
+	flag boolean;
+	currentPriority integer;
+begin
+    if startTime is null then
+        realStartTime:=to_char(current_date, ''yyyymmddhh24miss''); 
+    else
+        realStartTime:=startTime;
+    end if;
+
+	totalAmount:=0;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where SCHOOL_NAME=schoolName;
+	if n>0 then
+		checkSchoolName:=schoolName;
+	else
+		checkSchoolName:=null;
+	end if;
+
+	select count(*) into n from CFG_PRICING_STRATEGY where STUDENT_IDNUMBER=studentIDNumber;
+	if n>0 then
+		checkStudentIDNumber:=studentIDNumber;
+	else
+		checkStudentIDNumber:=null;
+	end if;
+	
+    open cur for select *
+		from CFG_PRICING_STRATEGY
+		where
+			FEE_TYPE=''HOUR'' and
+			(EFFECTIVE_DATE is null or EFFECTIVE_DATE<=substr(realStartTime, 1, 8)) and
+			(EXPIRED_DATE is null or substr(realStartTime, 1, 8)<=EXPIRED_DATE) and
+			(START_DATE is null or START_DATE<=substr(realStartTime, 1, 8)) and
+			(END_DATE is null or substr(realStartTime, 1, 8)<=END_DATE) and
+			(START_TIME is null or START_TIME<=substr(realStartTime, 9,6)) and
+			(END_TIME is null or substr(realStartTime, 9,6)<=END_TIME) and
+			(checkSchoolName is null or checkSchoolName=SCHOOL_NAME) and
+			(checkStudentIDNumber is null or checkStudentIDNumber=STUDENT_IDNUMBER)
+		order by PRIORITY;
+	currentPriority:=null;
+	message:='''';
+    loop
+        fetch cur into cur_rec;
+        exit when cur%NOTFOUND;
+        
+		if currentPriority=cur_rec.PRIORITY then continue;			--this priority already done
+		end if;
+		
+		ref2:=true;
+		flag:=true;
+		if cur_rec.REFERENCE_METHOD1 is not null then
+			case cur_rec.REFERENCE_METHOD1
+				when ''>'' then flag:=totalAmount>cur_rec.REFERENCE_AMOUNT1;
+				when ''='' then flag:=totalAmount=cur_rec.REFERENCE_AMOUNT1;
+				when ''<'' then flag:=totalAmount<cur_rec.REFERENCE_AMOUNT1;
+				when ''>='' then flag:=totalAmount>=cur_rec.REFERENCE_AMOUNT1;
+				when ''<='' then flag:=totalAmount<=cur_rec.REFERENCE_AMOUNT1;
+				when ''<>'' then flag:=totalAmount<>cur_rec.REFERENCE_AMOUNT1;
+				when ''!='' then flag:=totalAmount!=cur_rec.REFERENCE_AMOUNT1;
+				else flag:=true;
+			end case;
+			if cur_rec.REFERENCE_METHOD2 is not null and cur_rec.REFERENCE_RELATION is not null then
+				case cur_rec.REFERENCE_METHOD2
+					when ''>'' then ref2:=totalAmount>cur_rec.REFERENCE_AMOUNT2;
+					when ''='' then ref2:=totalAmount=cur_rec.REFERENCE_AMOUNT2;
+					when ''<'' then ref2:=totalAmount<cur_rec.REFERENCE_AMOUNT2;
+					when ''>='' then ref2:=totalAmount>=cur_rec.REFERENCE_AMOUNT2;
+					when ''<='' then ref2:=totalAmount<=cur_rec.REFERENCE_AMOUNT2;
+					when ''<>'' then ref2:=totalAmount<>cur_rec.REFERENCE_AMOUNT2;
+					when ''!='' then ref2:=totalAmount!=cur_rec.REFERENCE_AMOUNT2;
+					else ref2:=true;
+				end case;
+				if cur_rec.REFERENCE_RELATION=''||'' then flag:=flag or ref2;
+				else flag:=flag and ref2;
+				end if;
+			end if;
+		end if;
+		
+		if flag then
+			case cur_rec.ACTION
+				when ''set'' then totalAmount:=cur_rec.AMOUNT*studyTime/60;
+				when ''add'' then totalAmount:=totalAmount+cur_rec.AMOUNT;
+				when ''sub'' then totalAmount:=totalAmount-cur_rec.AMOUNT;
+				when ''mul'' then totalAmount:=totalAmount*cur_rec.AMOUNT;
+				when ''div'' then totalAmount:=totalAmount/cur_rec.AMOUNT;
+				else null;
+			end case;
+			currentPriority:=cur_rec.PRIORITY;
+			if length(message)>0 then message:=message||'';''||chr(13)||chr(10); end if;
+			message:=message||''HOUR, ''||''priority: ''||cur_rec.PRIORITY||'' ''||cur_rec.ACTION||'' ''||cur_rec.AMOUNT
+				||'' effect on: ''||case when cur_rec.EFFECTIVE_DATE is null then ''now'' else cur_rec.EFFECTIVE_DATE end
+				||'' to ''||case when cur_rec.EXPIRED_DATE is null then ''forever'' else cur_rec.EXPIRED_DATE end||'' ''
+				||case when cur_rec.REFERENCE_METHOD1 is null then '''' else '' when ''||cur_rec.REFERENCE_METHOD1||cur_rec.REFERENCE_AMOUNT1||case when cur_rec.REFERENCE_METHOD2 is null then '''' else cur_rec.REFERENCE_RELATION||cur_rec.REFERENCE_METHOD2||cur_rec.REFERENCE_AMOUNT2 end end
+				||'' at ''||case when cur_rec.START_TIME is null then ''000000'' else cur_rec.START_TIME end
+				||''-''||case when cur_rec.END_TIME is null then ''235959'' else cur_rec.END_TIME end
+				||'' from ''||case when cur_rec.START_DATE is null then ''now'' else cur_rec.START_DATE end
+				||'' to ''||case when cur_rec.START_DATE is null then ''forever'' else cur_rec.START_DATE end
+				||case when cur_rec.SCHOOL_NAME is null then '''' else '' for school: ''||cur_rec.SCHOOL_NAME end
+				||case when cur_rec.STUDENT_IDNUMBER is null then '''' else '' for student: ''||cur_rec.STUDENT_IDNUMBER end;
+		end if;
+	end loop;
+	return totalAmount;
+end GetPriceByTime;';
+			--StoredProcedures\BookFromManagementByTime;
+execute immediate 'create or replace function BookFromManagementByTime
+(
+	message out varchar2,
+	operatorLoginName in varchar2,
+	studentIDNumber in BAS_STUDENT.IDNUMBER%TYPE,
+	subjectName in varchar2,
+	studyTime in integer,
+	amount in number,
+	paymentWay in CFG_DICT.DICT_NAME%TYPE,
+	bookingDatetime in BAS_BOOKING.BOOKING_DATETIME%TYPE,
+	carLicensePlate in BAS_CAR.LICENSE_PLATE%TYPE,
+	cashierName in varchar2,
+	cashierIDNumber in varchar2,
+	hostIP in varchar2,					--host ip
+	hostMAC in varchar2					--host mac
+) return integer as
+	n integer;
+	studentID BAS_STUDENT.ID%TYPE;
+	licenseType BAS_STUDENT.DRIVER_LICENSE_TYPE%TYPE;
+	schoolName BAS_DRIVING_SCHOOL.NAME%TYPE;
+	carID BAS_CAR.ID%TYPE;
+	bookingID BAS_BOOKING.ID%TYPE;
+	tradeNumber BUZ_PAYMENT_DETAIL.TRADE_NO%TYPE;
+	currentDate BAS_BOOKING.BOOKING_DATETIME%TYPE;
+begin
+	select count(*) into n from SYS_USER where LOGIN_NAME=operatorLoginName;
+	if n=0 then
+		message:=''操作员：''||operatorLoginName||''不存在'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -1;
+	end if;
+
+	select count(*) into n from BAS_STUDENT where IDNUMBER=studentIDNumber;
+	if n=0 then
+		message:=''学员：''||studentIDNumber||''不存在'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -2;
+	end if;
+	select ID, DRIVER_LICENSE_TYPE, SCHOOL_NAME into studentID, licenseType, schoolName from BAS_STUDENT where IDNUMBER=studentIDNumber;
+
+	if amount<>GetPriceByTime(message, studyTime, bookingDatetime, schoolName, studentIDNumber) then
+		message:=''金额不正确'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -3;
+	end if;
+
+	if carLicensePlate is not null and length(carLicensePlate)>0 then
+		select count(*) into n from BAS_CAR where LICENSE_PLATE=carLicensePlate;
+		if n=0 then
+			message:=''车辆：''||carLicensePlate||''不存在'';
+			AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+			return -4;
+		end if;
+		select ID into carID from BAS_CAR where LICENSE_PLATE=carLicensePlate;
+	end if;
+
+	select count(*) into n from BAS_BOOKING where STUDENT_ID=studentID and BOOKING_EXAM_DATE=substr(bookingDatetime, 1, 8) and not exists((select * from buz_exam_info where BOOKING_ID=BAS_BOOKING.ID));
+	if n>0 then
+		message:=''预约失败，有未使用的预约'';
+		AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 0, hostIP, hostMAC);
+		return -5;
+	end if;
+
+	bookingID:=SEQU_BAS_BOOKING_ID.nextval;
+	insert into BAS_BOOKING(
+		ID,
+		SEQUENCENUMBER,
+		SUBJECT,
+		EXAMNUMBER,
+		STUDENT_ID,
+        STUDY_TIME,
+		BOOKING_DATETIME,
+		BOOKING_TIMES,
+		BOOKING_EXAM_DATE,
+		DRIVER_LICENSE_TYPE,
+		PLACE_ID,
+		CAR_ID,
+		OPERATOR_NAME,
+		BRANCH_ADMINISTRATION,
+		SCHOOL_ID,
+		BRANCH_BUSINESS,
+		SIGN_STATUS)
+	values(
+		bookingID,
+		NewBookSequenceNumber,
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1006 and DICT_NAME=subjectName),
+		NewExamNumber,
+		studentID,
+        studyTime,
+		bookingDatetime,
+		0,
+		substr(bookingDatetime, 1, 8),
+		licenseType,
+		(select max(ID) from BAS_PLACE),
+		carID,
+		operatorLoginName,
+		''管理'',
+		(select ID from BAS_DRIVING_SCHOOL where NAME=schoolName),
+		''业务'',
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1031 and DICT_NAME=''已签到''));
+
+	tradeNumber:=NewTradeNumber;
+	currentDate:=to_char(current_date, ''yyyymmddhh24miss'');
+	insert into BUZ_PAYMENT_DETAIL(
+		ID,
+		TRADE_NO,
+		PAY_TIME,
+		OPERATOR_NAME,
+		OPERATOR_IDNUMBER,
+		STUDENT_IDNUMBER,
+		SUBJECT,
+		FEE_TYPE,
+		TIMES,
+		AMOUNT,
+		PAYMENT_WAY,
+		BOOKING_ID,
+		PRICING_STRATEGY,
+		HASH)
+	values(
+		SEQU_BUZ_PAYMENT_DETAIL_ID.nextval,
+		tradeNumber,
+		currentDate,
+		cashierName,
+		cashierIDNumber,
+		studentIDNumber,
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1006 and DICT_NAME=subjectName),
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1002 and DICT_NAME=''计次''),
+		studyTime,
+		amount,
+		(select DICT_CODE from CFG_DICT where DICT_TYPE=1001 and DICT_NAME=paymentWay),
+		bookingID,
+		message,
+		GenerateSHA1(tradeNumber||currentDate||cashierName||cashierIDNumber||studentIDNumber||studyTime||amount||bookingID||message));
+
+	commit;
+	message:=''交易序号：''||tradeNumber||chr(13)||chr(10)
+		||''交易时间：''||currentDate||chr(13)||chr(10)
+		||''收银员姓名：''||cashierName||chr(13)||chr(10)
+		||''收银员身份证号：''||cashierIDNumber||chr(13)||chr(10)
+		||''学员身份证号：''||studentIDNumber||chr(13)||chr(10)
+		||''时间（分钟）：''||studyTime||chr(13)||chr(10)
+		||''金额：''||amount||chr(13)||chr(10);
+	AddLog(operatorLoginName, ''学员管理'', ''预约'', message, 1, hostIP, hostMAC);
+	return 0;
+end BookFromManagementByTime;';
+
+			--Views\BAS_STUDENT_VIEW;
+execute immediate 'CREATE OR REPLACE FORCE VIEW BAS_STUDENT_VIEW AS
+SELECT  
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=2002 and DICT_CODE=IDTYPE) IDTYPE_DICT_NAME,
+    IDNUMBER,
+    NAME,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=2001 and DICT_CODE=GENDER) GENDER_DICT_NAME,
+    DRIVER_LICENSE_TYPE,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=2003 and DICT_CODE=DRIVER_LICENSE_TYPE) DRIVER_LICENSE_TYPE_DICT_NAME,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=1036 and DICT_CODE=STATUS) STATUS_DICT_NAME,
+    SCHOOL_NAME,
+    ID,
+    PHOTO1,
+    PHOTO2,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID) then ''已预约'' else ''未预约'' end BOOKED,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) else null end BOOKING_TIMES,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)) else null end LEFT_TIMES,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0) then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0) else null end BOOKING_STUDY_TIME,
+    case when exists(select * from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)
+        then
+            case when exists(select * from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+                then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+                else (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)
+            end
+        else null
+        end LEFT_STUDY_TIME,
+		CREATE_TIME,
+		UPDATE_TIME
+FROM BAS_STUDENT
+order by ID';
+			--Views\CAR_ALLOCATION_CAR_VIEW
+execute immediate 'CREATE OR REPLACE FORCE VIEW CAR_ALLOCATION_CAR_VIEW AS 
+select
+    LICENSE_PLATE,
+    CARNUMBER,
+    QUALIFIED_CAR_TYPE,
+    (select DICT_NAME from CFG_DICT where DICT_TYPE=1025 and DICT_CODE=PROCESS_TYPE) PROCESS_TYPE_DICTNAME,
+	(select ITEM_NAME from CFG_ITEMS where ITEM_CODE=EXAM_ITEM) EXAM_ITEM_DICTNAME,
+
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select SEQUENCENUMBER+1-(select min(SEQUENCENUMBER) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')) from bas_booking where ID=BOOKING.ID) 
+        else null 
+    end SEQUENCE_NUMBER,
+
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select NAME from bas_student where ID=BOOKING.STUDENT_ID) 
+        else null 
+    end STUDENT_NAME,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select IDNUMBER from bas_student where ID=BOOKING.STUDENT_ID) 
+        else null 
+    end STUDENT_IDNUMBER,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0) 
+        else null 
+    end BOOKING_TIMES,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)) 
+        else null 
+    end LEFT_TIMES,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)
+        else null
+    end BOOKING_STUDY_TIME,
+    
+    case when USE_STATUS=''A''
+        and not exists(select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and not exists(select * from buz_exam_info where booking_id=bas_booking.id))
+        and ( EXAM.EXAM_END_TIME is null 
+            or (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME=0))>0
+            or (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))>0)
+        then
+            case when exists(select * from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))
+                then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.ID and STUDY_TIME>0))
+                else (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BOOKING.STUDENT_ID and STUDY_TIME>0)
+            end
+        else null
+    end LEFT_STUDY_TIME,
+    
+    USE_STATUS
+from bas_car left join (buz_exam_process PROCESS join buz_exam_info EXAM on PROCESS.EXAM_ID=EXAM.ID join bas_booking BOOKING on BOOKING.ID=EXAM.BOOKING_ID) on bas_car.ID=EXAM.CAR_ID and PROCESS.ID in (select max(ID) from buz_exam_process where EXAM_ID in (select max(ID) from buz_exam_info where substr(EXAM_START_TIME,1,8)=to_char(current_date, ''yyyymmdd'') group by CAR_ID) group by EXAM_ID)
+order by bas_car.USE_STATUS, bas_car.ID';
+			--Views\CAR_ALLOCATION_STUDENT_VIEW
+execute immediate 'CREATE OR REPLACE FORCE VIEW CAR_ALLOCATION_STUDENT_VIEW AS 
+select 
+	(select SEQUENCENUMBER+1-(select min(SEQUENCENUMBER) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')) from bas_booking where id=(select max(id) from bas_booking where STUDENT_ID=bas_student.ID and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd''))) SEQUENCE_NUMBER,
+    NAME,
+    IDNUMBER,
+    DRIVER_LICENSE_TYPE,
+    (select CARNUMBER from bas_car where ID=(select CAR_ID from bas_booking where id=(select max(id) from bas_booking where STUDENT_ID=bas_student.ID and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'')))) BOOKING_CAR,
+    (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0) BOOKING_TIMES,
+    (select sum(BOOKING_TIMES) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)-(select count(*) from BUZ_EXAM_INFO where BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME=0)) LEFT_TIMES,
+    (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0) BOOKING_STUDY_TIME,
+    case when exists(select * from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+        then (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)-(select sum(round((to_date(EXAM_END_TIME,''yyyymmddhh24miss'')-to_date(EXAM_START_TIME,''yyyymmddhh24miss''))*24*60)) from BUZ_EXAM_INFO where EXAM_END_TIME is not null and BOOKING_ID in (select ID from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0))
+        else (select sum(STUDY_TIME) from BAS_BOOKING where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and STUDENT_ID=BAS_STUDENT.ID and STUDY_TIME>0)
+    end LEFT_STUDY_TIME
+from bas_student
+where ID in (select distinct(STUDENT_ID) from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select * from buz_exam_info where BOOKING_ID=bas_booking.ID))
+order by (select min(id) from bas_booking where student_id=bas_student.id and BOOKING_EXAM_DATE=to_char(current_date, ''yyyymmdd'') and not exists(select *from buz_exam_info where BOOKING_ID=bas_booking.ID))';
+
+			update CFG_PARAM set PARAM_VALUE='1.0.0.4' where PARAM_NAME='DATABASE_VERSION';
+
+		when '1.0.0.4' then
+			dbms_output.put_line('version 1.0.0.4');
+
+
+
 
         else
             dbms_output.put_line('unknown version');
@@ -1714,6 +3928,7 @@ alter function AddRole compile;
 alter function AddUpdatePricingStrategy compile;
 alter function AddUpdateUser compile;
 alter function BookFromManagement compile;
+alter function BookFromManagementByTime compile;
 alter function BookFromVehicle compile;
 alter function BookFromVehicleNoPassword compile;
 alter function ChangePassword compile;
@@ -1723,6 +3938,7 @@ alter function GenerateHMAC compile;
 alter function GenerateSHA1 compile;
 alter function GenerateSUB2 compile;
 alter function GetPriceByTimes compile;
+alter function GetPriceByTime compile;
 alter function GrantRolePermission compile;
 alter function Login compile;
 alter function NewBookSequenceNumber compile;

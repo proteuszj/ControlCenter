@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 using static Client.DBM;
@@ -23,6 +24,8 @@ namespace Client
             "STUDENT_IDNUMBER 车上学员身份证明号码, " +
             "BOOKING_TIMES 预约次数, " +
             "LEFT_TIMES 剩余次数, " +
+            "BOOKING_STUDY_TIME 预约时间, " +
+            "LEFT_STUDY_TIME 剩余时间, " +
             "USE_STATUS 使用状态 " +
             "from CAR_ALLOCATION_CAR_VIEW";
         static readonly string __WaitingStudentSQL = "select " +
@@ -32,7 +35,9 @@ namespace Client
             "DRIVER_LICENSE_TYPE 考试车型, " +
             "BOOKING_CAR 预约车辆, " +
             "BOOKING_TIMES 预约次数, " +
-            "LEFT_TIMES 剩余次数 " +
+            "LEFT_TIMES 剩余次数, " +
+            "BOOKING_STUDY_TIME 预约时间, " +
+            "LEFT_STUDY_TIME 剩余时间 " +
             "from CAR_ALLOCATION_STUDENT_VIEW";
         static readonly string __UpdateCarStatusSQL = "update BAS_CAR set USE_STATUS='{0}' where LICENSE_PLATE='{1}'";
         static readonly string __AllocateCarSQL = "update bas_booking set CAR_ID=(select ID from bas_car where LICENSE_PLATE='{0}') where BOOKING_EXAM_DATE=to_char(current_date, 'yyyymmdd') and STUDENT_ID=(select ID from bas_student where IDNUMBER='{1}')";
@@ -41,6 +46,7 @@ namespace Client
         static readonly string __UnusedBooking = "select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, 'yyyymmdd') and STUDENT_ID=(select ID from bas_student where IDNUMBER='{0}') and not exists(select * from buz_exam_info where BOOKING_ID=bas_booking.ID)";
 
         TcpClient __TcpClient;
+        Mutex __Mutex = new Mutex();
 
         public Form_CarAllocation()
         {
@@ -69,6 +75,8 @@ namespace Client
             dataGridView_car.Columns.Add("车上学员身份证明号码", "车上学员身份证明号码");
             dataGridView_car.Columns.Add("预约次数", "预约次数");
             dataGridView_car.Columns.Add("剩余次数", "剩余次数");
+            dataGridView_car.Columns.Add("预约时间", "预约时间");
+            dataGridView_car.Columns.Add("剩余时间", "剩余时间");
             dataGridView_car.Columns.Add("使用状态", "使用状态");
             dataGridView_car.Columns.Add("分配学员姓名", "分配学员姓名");
             dataGridView_car.Columns.Add("分配学员身份证明号码", "分配学员身份证明号码");
@@ -84,6 +92,8 @@ namespace Client
             dataGridView_student.Columns.Add("预约车辆", "预约车辆");
             dataGridView_student.Columns.Add("预约次数", "预约次数");
             dataGridView_student.Columns.Add("剩余次数", "剩余次数");
+            dataGridView_student.Columns.Add("预约时间", "预约时间");
+            dataGridView_student.Columns.Add("剩余时间", "剩余时间");
             dataGridView_student.Columns.Add("状态", "状态");
             dataGridView_student.Columns.Add("更新时间", "更新时间");
             for (int i = 0; i < dataGridView_student.ColumnCount; i++)
@@ -93,10 +103,11 @@ namespace Client
             button_manualAllocate.Enabled = dataGridView_student.RowCount > 0;
         }
 
-        private void Form_CarAllocation_Load(object sender, EventArgs e)
+        private void Form_CarAllocation_Activated(object sender, EventArgs e)
         {
             refreshCar();
             refreshStudent();
+            timer_refresh.Start();
         }
 
         private void checkedListBox_carMaintenance_MouseEnter(object sender, EventArgs e)
@@ -122,8 +133,7 @@ namespace Client
                 if ("A" != value)
                     mDBM.ExecuteNonQuery(string.Format(__RevokeCarSQL, carLicensePlate));
             }
-            string message;
-            mDBM.SetParameter(out message, "CAR_ALLOCATION_INTERVAL", numericUpDown_update.Value.ToString());
+            mDBM.SetParameter(out string message, "CAR_ALLOCATION_INTERVAL", numericUpDown_update.Value.ToString());
             mDBM.SetParameter(out message, "CAR_ALLOCATION_PROJECT_ADDRESS", textBox_projectAddress.Text);
             mDBM.SetParameter(out message, "CAR_ALLOCATION_PROJECT_PORT", textBox_projectPort.Text);
             mDBM.SetParameter(out message, "CAR_ALLOCATION_PROJECT_COUNT", numericUpDown_projcetStudentCount.Value.ToString());
@@ -237,15 +247,26 @@ namespace Client
 
         private void timer_allocate_Tick(object sender, EventArgs e)
         {
+            __Mutex.WaitOne();
             int index, calledIndex;
-            timer_allocate.Stop();
             if (dataGridView_student.RowCount > 0)
             {
+                index = 0;
+                for (int i = 0; i < dataGridView_student.RowCount; i++)
+                {
+                    string announceTime = dataGridView_student.Rows[index].Cells["更新时间"].Value.ToString();
+                    if (!string.IsNullOrEmpty(announceTime) && DateTime.Now > Convert.ToDateTime(announceTime).AddMinutes((double)numericUpDown_waitingTimeout.Value))
+                        reallocate(index);
+                    else
+                        index++;
+                }
+
                 for (int i = 0; i < dataGridView_car.RowCount; i++)
                     if ((string.IsNullOrEmpty(dataGridView_car.Rows[i].Cells["项目状态"].Value.ToString()) || "考试科目结束" == dataGridView_car.Rows[i].Cells["项目状态"].Value.ToString()) &&
                         "A" == dataGridView_car.Rows[i].Cells["使用状态"].Value.ToString() &&
                         string.IsNullOrEmpty(dataGridView_car.Rows[i].Cells["分配学员姓名"].Value.ToString()) &&
-                        (string.IsNullOrEmpty(dataGridView_car.Rows[i].Cells["剩余次数"].Value.ToString()) || "0" == dataGridView_car.Rows[i].Cells["剩余次数"].Value.ToString()))
+                        (string.IsNullOrEmpty(dataGridView_car.Rows[i].Cells["剩余次数"].Value.ToString()) || "0" == dataGridView_car.Rows[i].Cells["剩余次数"].Value.ToString()) &&
+                        (string.IsNullOrEmpty(dataGridView_car.Rows[i].Cells["剩余时间"].Value.ToString()) || "0" == dataGridView_car.Rows[i].Cells["剩余时间"].Value.ToString()))
                     {
                         string carLicensePlate = dataGridView_car.Rows[i].Cells["车牌"].Value.ToString();
                         string carNumber = dataGridView_car.Rows[i].Cells["车辆编号"].Value.ToString();
@@ -284,28 +305,31 @@ namespace Client
                         }
                     }
 
-                index = 0;
-                for (int i = 0; i < dataGridView_student.RowCount; i++)
-                {
-                    string announceTime = dataGridView_student.Rows[index].Cells["更新时间"].Value.ToString();
-                    if (!string.IsNullOrEmpty(announceTime) && DateTime.Now > Convert.ToDateTime(announceTime).AddMinutes((double)numericUpDown_waitingTimeout.Value))
-                        reallocate(index);
-                    else
-                        index++;
-                }
-
                 calledIndex = 0;
                 bool isC1 = true;
                 for (int i = 0; i < dataGridView_student.RowCount; i++)
                 {
                     if ("已叫号" == dataGridView_student.Rows[i].Cells["状态"].Value.ToString()) calledIndex++;
-                    else if (isC1 == ("C1" == dataGridView_student.Rows[i].Cells["考试车型"].Value.ToString()) && i > calledIndex)
+                    else if (i <= calledIndex)
                     {
-                        moveRow(dataGridView_student, i, calledIndex);
                         while (calledIndex < dataGridView_student.RowCount && isC1 == ("C1" == dataGridView_student.Rows[calledIndex].Cells["考试车型"].Value.ToString()))
                         {
                             calledIndex++;
                             isC1 = !isC1;
+                        }
+                        if (calledIndex >= dataGridView_student.RowCount) break;
+                    }
+                    else
+                    {
+                        if (isC1 == ("C1" == dataGridView_student.Rows[i].Cells["考试车型"].Value.ToString()))
+                        {
+                            moveRow(dataGridView_student, i, calledIndex);
+                            while (calledIndex < dataGridView_student.RowCount && isC1 == ("C1" == dataGridView_student.Rows[calledIndex].Cells["考试车型"].Value.ToString()))
+                            {
+                                calledIndex++;
+                                isC1 = !isC1;
+                            }
+                            if (calledIndex >= dataGridView_student.RowCount) break;
                         }
                     }
                 }
@@ -316,9 +340,11 @@ namespace Client
 
             if (null != __TcpClient)
             {
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.Indent = false;
-                settings.OmitXmlDeclaration = true;
+                XmlWriterSettings settings = new XmlWriterSettings
+                {
+                    Indent = false,
+                    OmitXmlDeclaration = true
+                };
                 StringBuilder sb = new StringBuilder();
                 XmlWriter writer = XmlWriter.Create(sb, settings);
                 int count = 0;
@@ -342,6 +368,8 @@ namespace Client
                         writer.WriteAttributeString("bookingCar", dataGridView_car.Rows[i].Cells["车辆编号"].Value.ToString());
                         writer.WriteAttributeString("bookingTimes", dataGridView_car.Rows[i].Cells["预约次数"].Value.ToString());
                         writer.WriteAttributeString("bookingLeftTimes", dataGridView_car.Rows[i].Cells["剩余次数"].Value.ToString());
+                        writer.WriteAttributeString("bookingStudyTime", dataGridView_car.Rows[i].Cells["预约时间"].Value.ToString());
+                        writer.WriteAttributeString("bookingLeftStudyTime", dataGridView_car.Rows[i].Cells["剩余时间"].Value.ToString());
                         writer.WriteAttributeString("status", "已上车");
                         writer.WriteEndElement();
                     }
@@ -356,6 +384,8 @@ namespace Client
                     writer.WriteAttributeString("bookingCar", dataGridView_student.Rows[i].Cells["预约车辆"].Value.ToString());
                     writer.WriteAttributeString("bookingTimes", dataGridView_student.Rows[i].Cells["预约次数"].Value.ToString());
                     writer.WriteAttributeString("bookingLeftTimes", dataGridView_student.Rows[i].Cells["剩余次数"].Value.ToString());
+                    writer.WriteAttributeString("bookingStudyTime", dataGridView_student.Rows[i].Cells["预约时间"].Value.ToString());
+                    writer.WriteAttributeString("bookingLeftStudyTime", dataGridView_student.Rows[i].Cells["剩余时间"].Value.ToString());
                     writer.WriteAttributeString("status", dataGridView_student.Rows[i].Cells["状态"].Value.ToString());
                     writer.WriteEndElement();
                 }
@@ -376,7 +406,15 @@ namespace Client
                 //fs.Close();
 
             }
-            timer_allocate.Start();
+            __Mutex.ReleaseMutex();
+        }
+
+        private void timer_refresh_Tick(object sender, EventArgs e)
+        {
+            __Mutex.WaitOne();
+            refreshCar();
+            refreshStudent();
+            __Mutex.ReleaseMutex();
         }
 
         void refreshCar()
@@ -406,37 +444,28 @@ namespace Client
                         dataGridView_car.Rows.RemoveAt(j);
                         dataGridView_car.Rows.Insert(i, 1);
                     }
-                    dataGridView_car.Rows[i].Cells["车牌"].Value = dataTable.Rows[i]["车牌"].ToString();
-                    dataGridView_car.Rows[i].Cells["车辆编号"].Value = dataTable.Rows[i]["车辆编号"].ToString();
-                    dataGridView_car.Rows[i].Cells["车辆类型"].Value = dataTable.Rows[i]["车辆类型"].ToString();
-                    dataGridView_car.Rows[i].Cells["项目状态"].Value = dataTable.Rows[i]["项目状态"].ToString();
-                    dataGridView_car.Rows[i].Cells["当前项目"].Value = dataTable.Rows[i]["当前项目"].ToString();
-                    dataGridView_car.Rows[i].Cells["预约序号"].Value = dataTable.Rows[i]["预约序号"].ToString();
-                    dataGridView_car.Rows[i].Cells["车上学员姓名"].Value = dataTable.Rows[i]["车上学员姓名"].ToString();
-                    dataGridView_car.Rows[i].Cells["车上学员身份证明号码"].Value = dataTable.Rows[i]["车上学员身份证明号码"].ToString();
-                    dataGridView_car.Rows[i].Cells["预约次数"].Value = dataTable.Rows[i]["预约次数"].ToString();
-                    dataGridView_car.Rows[i].Cells["剩余次数"].Value = dataTable.Rows[i]["剩余次数"].ToString();
-                    dataGridView_car.Rows[i].Cells["使用状态"].Value = dataTable.Rows[i]["使用状态"].ToString();
                     dataGridView_car.Rows[i].Cells["分配学员姓名"].Value = allocatedStudentName;
                     dataGridView_car.Rows[i].Cells["分配学员身份证明号码"].Value = allocatedStudentIDNumber;
                 }
                 else
                 {
                     dataGridView_car.Rows.Insert(i, 1);
-                    dataGridView_car.Rows[i].Cells["车牌"].Value = dataTable.Rows[i]["车牌"].ToString();
-                    dataGridView_car.Rows[i].Cells["车辆编号"].Value = dataTable.Rows[i]["车辆编号"].ToString();
-                    dataGridView_car.Rows[i].Cells["车辆类型"].Value = dataTable.Rows[i]["车辆类型"].ToString();
-                    dataGridView_car.Rows[i].Cells["项目状态"].Value = dataTable.Rows[i]["项目状态"].ToString();
-                    dataGridView_car.Rows[i].Cells["当前项目"].Value = dataTable.Rows[i]["当前项目"].ToString();
-                    dataGridView_car.Rows[i].Cells["预约序号"].Value = dataTable.Rows[i]["预约序号"].ToString();
-                    dataGridView_car.Rows[i].Cells["车上学员姓名"].Value = dataTable.Rows[i]["车上学员姓名"].ToString();
-                    dataGridView_car.Rows[i].Cells["车上学员身份证明号码"].Value = dataTable.Rows[i]["车上学员身份证明号码"].ToString();
-                    dataGridView_car.Rows[i].Cells["预约次数"].Value = dataTable.Rows[i]["预约次数"].ToString();
-                    dataGridView_car.Rows[i].Cells["剩余次数"].Value = dataTable.Rows[i]["剩余次数"].ToString();
-                    dataGridView_car.Rows[i].Cells["使用状态"].Value = dataTable.Rows[i]["使用状态"].ToString();
                     dataGridView_car.Rows[i].Cells["分配学员姓名"].Value = string.Empty;
                     dataGridView_car.Rows[i].Cells["分配学员身份证明号码"].Value = string.Empty;
                 }
+                dataGridView_car.Rows[i].Cells["车牌"].Value = dataTable.Rows[i]["车牌"].ToString();
+                dataGridView_car.Rows[i].Cells["车辆编号"].Value = dataTable.Rows[i]["车辆编号"].ToString();
+                dataGridView_car.Rows[i].Cells["车辆类型"].Value = dataTable.Rows[i]["车辆类型"].ToString();
+                dataGridView_car.Rows[i].Cells["项目状态"].Value = dataTable.Rows[i]["项目状态"].ToString();
+                dataGridView_car.Rows[i].Cells["当前项目"].Value = dataTable.Rows[i]["当前项目"].ToString();
+                dataGridView_car.Rows[i].Cells["预约序号"].Value = dataTable.Rows[i]["预约序号"].ToString();
+                dataGridView_car.Rows[i].Cells["车上学员姓名"].Value = dataTable.Rows[i]["车上学员姓名"].ToString();
+                dataGridView_car.Rows[i].Cells["车上学员身份证明号码"].Value = dataTable.Rows[i]["车上学员身份证明号码"].ToString();
+                dataGridView_car.Rows[i].Cells["预约次数"].Value = dataTable.Rows[i]["预约次数"].ToString();
+                dataGridView_car.Rows[i].Cells["剩余次数"].Value = dataTable.Rows[i]["剩余次数"].ToString();
+                dataGridView_car.Rows[i].Cells["预约时间"].Value = dataTable.Rows[i]["预约时间"].ToString();
+                dataGridView_car.Rows[i].Cells["剩余时间"].Value = dataTable.Rows[i]["剩余时间"].ToString();
+                dataGridView_car.Rows[i].Cells["使用状态"].Value = dataTable.Rows[i]["使用状态"].ToString();
             }
 
             if (dataGridView_car.RowCount > 0)
@@ -498,6 +527,8 @@ namespace Client
                     dataGridView_student.Rows[index].Cells["预约车辆"].Value = dataTable.Rows[j]["预约车辆"];
                     dataGridView_student.Rows[index].Cells["预约次数"].Value = dataTable.Rows[j]["预约次数"];
                     dataGridView_student.Rows[index].Cells["剩余次数"].Value = dataTable.Rows[j]["剩余次数"];
+                    dataGridView_student.Rows[index].Cells["预约时间"].Value = dataTable.Rows[j]["预约时间"];
+                    dataGridView_student.Rows[index].Cells["剩余时间"].Value = dataTable.Rows[j]["剩余时间"];
                     dataGridView_student.Rows[index].Cells["状态"].Value = "未叫号";
                     dataGridView_student.Rows[index].Cells["更新时间"].Value = string.Empty;
                 }
@@ -536,9 +567,11 @@ namespace Client
 
             if (null != __TcpClient)
             {
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.Indent = false;
-                settings.OmitXmlDeclaration = true;
+                XmlWriterSettings settings = new XmlWriterSettings
+                {
+                    Indent = false,
+                    OmitXmlDeclaration = true
+                };
                 StringBuilder sb = new StringBuilder();
                 XmlWriter writer = XmlWriter.Create(sb, settings);
 
@@ -587,8 +620,10 @@ namespace Client
             DataGridViewRow newRow = new DataGridViewRow();
             for (int i = 0; i < row.Cells.Count; i++)
             {
-                DataGridViewTextBoxCell cell = new DataGridViewTextBoxCell();
-                cell.Value = row.Cells[i].Value;
+                DataGridViewTextBoxCell cell = new DataGridViewTextBoxCell
+                {
+                    Value = row.Cells[i].Value
+                };
                 newRow.Cells.Add(cell);
             }
             if (targetIndex > sourceIndex) targetIndex++;

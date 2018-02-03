@@ -57,9 +57,10 @@
             this.groupBox_car = new System.Windows.Forms.GroupBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.button_cancelManualAllocate = new System.Windows.Forms.Button();
             this.button_reallocate = new System.Windows.Forms.Button();
             this.groupBox_student = new System.Windows.Forms.GroupBox();
-            this.button_cancelManualAllocate = new System.Windows.Forms.Button();
+            this.timer_refresh = new System.Windows.Forms.Timer(this.components);
             this.panel_setting.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_waitingTimeout)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_projcetStudentCount)).BeginInit();
@@ -405,6 +406,18 @@
             this.splitContainer2.SplitterDistance = 272;
             this.splitContainer2.TabIndex = 0;
             // 
+            // button_cancelManualAllocate
+            // 
+            this.button_cancelManualAllocate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_cancelManualAllocate.Enabled = false;
+            this.button_cancelManualAllocate.Location = new System.Drawing.Point(434, 441);
+            this.button_cancelManualAllocate.Name = "button_cancelManualAllocate";
+            this.button_cancelManualAllocate.Size = new System.Drawing.Size(40, 68);
+            this.button_cancelManualAllocate.TabIndex = 6;
+            this.button_cancelManualAllocate.Text = "取消指定分车";
+            this.button_cancelManualAllocate.UseVisualStyleBackColor = true;
+            this.button_cancelManualAllocate.Click += new System.EventHandler(this.button_cancelManualAllocate_Click);
+            // 
             // button_reallocate
             // 
             this.button_reallocate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -429,17 +442,10 @@
             this.groupBox_student.TabStop = false;
             this.groupBox_student.Text = "学员列表";
             // 
-            // button_cancelManualAllocate
+            // timer_refresh
             // 
-            this.button_cancelManualAllocate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cancelManualAllocate.Enabled = false;
-            this.button_cancelManualAllocate.Location = new System.Drawing.Point(434, 441);
-            this.button_cancelManualAllocate.Name = "button_cancelManualAllocate";
-            this.button_cancelManualAllocate.Size = new System.Drawing.Size(40, 68);
-            this.button_cancelManualAllocate.TabIndex = 6;
-            this.button_cancelManualAllocate.Text = "取消指定分车";
-            this.button_cancelManualAllocate.UseVisualStyleBackColor = true;
-            this.button_cancelManualAllocate.Click += new System.EventHandler(this.button_cancelManualAllocate_Click);
+            this.timer_refresh.Interval = 5000;
+            this.timer_refresh.Tick += new System.EventHandler(this.timer_refresh_Tick);
             // 
             // Form_CarAllocation
             // 
@@ -452,7 +458,7 @@
             this.Controls.Add(this.panel_setting);
             this.Name = "Form_CarAllocation";
             this.Text = "分车叫号";
-            this.Load += new System.EventHandler(this.Form_CarAllocation_Load);
+            this.Activated += new System.EventHandler(this.Form_CarAllocation_Activated);
             this.panel_setting.ResumeLayout(false);
             this.panel_setting.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_waitingTimeout)).EndInit();
@@ -504,5 +510,6 @@
         private System.Windows.Forms.GroupBox groupBox_student;
         private System.Windows.Forms.Button button_reallocate;
         private System.Windows.Forms.Button button_cancelManualAllocate;
+        private System.Windows.Forms.Timer timer_refresh;
     }
 }

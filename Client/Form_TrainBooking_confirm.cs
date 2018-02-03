@@ -18,7 +18,11 @@ namespace Client
             label_subject.Text = subjectName;
             label_times.Text = times;
             label_amount.Text = amount;
+#if DEBUG
+#warning TEST mode,预约操作的身份证读卡器确认环节被禁用
+#else
             btn_ok.Enabled = false;
+#endif
         }
 
         private void button_readCard_Click(object sender, EventArgs e)

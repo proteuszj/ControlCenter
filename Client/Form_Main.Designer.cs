@@ -37,7 +37,7 @@
             this.注销ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.退出ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.学员管理ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.预约培训ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.预约计次培训ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.支付流水ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.分车叫号ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.过程查询ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -77,6 +77,7 @@
             this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.timer_op = new System.Windows.Forms.Timer(this.components);
             this.timer_start = new System.Windows.Forms.Timer(this.components);
+            this.预约计时培训ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.SuspendLayout();
@@ -142,7 +143,8 @@
             // 学员管理ToolStripMenuItem
             // 
             this.学员管理ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.预约培训ToolStripMenuItem,
+            this.预约计次培训ToolStripMenuItem,
+            this.预约计时培训ToolStripMenuItem,
             this.支付流水ToolStripMenuItem,
             this.分车叫号ToolStripMenuItem,
             this.过程查询ToolStripMenuItem});
@@ -150,12 +152,12 @@
             this.学员管理ToolStripMenuItem.Size = new System.Drawing.Size(68, 21);
             this.学员管理ToolStripMenuItem.Text = "培训管理";
             // 
-            // 预约培训ToolStripMenuItem
+            // 预约计次培训ToolStripMenuItem
             // 
-            this.预约培训ToolStripMenuItem.Name = "预约培训ToolStripMenuItem";
-            this.预约培训ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.预约培训ToolStripMenuItem.Text = "预约培训";
-            this.预约培训ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
+            this.预约计次培训ToolStripMenuItem.Name = "预约计次培训ToolStripMenuItem";
+            this.预约计次培训ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.预约计次培训ToolStripMenuItem.Text = "预约计次培训";
+            this.预约计次培训ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 支付流水ToolStripMenuItem
             // 
@@ -193,28 +195,28 @@
             // 预约及签到ToolStripMenuItem
             // 
             this.预约及签到ToolStripMenuItem.Name = "预约及签到ToolStripMenuItem";
-            this.预约及签到ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.预约及签到ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.预约及签到ToolStripMenuItem.Text = "预约及签到";
             this.预约及签到ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 分组及分车ToolStripMenuItem
             // 
             this.分组及分车ToolStripMenuItem.Name = "分组及分车ToolStripMenuItem";
-            this.分组及分车ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.分组及分车ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.分组及分车ToolStripMenuItem.Text = "分组及分车";
             this.分组及分车ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 考试状态ToolStripMenuItem
             // 
             this.考试状态ToolStripMenuItem.Name = "考试状态ToolStripMenuItem";
-            this.考试状态ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.考试状态ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.考试状态ToolStripMenuItem.Text = "考试状态";
             this.考试状态ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 成绩打印ToolStripMenuItem
             // 
             this.成绩打印ToolStripMenuItem.Name = "成绩打印ToolStripMenuItem";
-            this.成绩打印ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.成绩打印ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.成绩打印ToolStripMenuItem.Text = "成绩打印";
             this.成绩打印ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
@@ -230,14 +232,14 @@
             // 综合统计ToolStripMenuItem
             // 
             this.综合统计ToolStripMenuItem.Name = "综合统计ToolStripMenuItem";
-            this.综合统计ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.综合统计ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.综合统计ToolStripMenuItem.Text = "综合统计";
             this.综合统计ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 综合查询ToolStripMenuItem
             // 
             this.综合查询ToolStripMenuItem.Name = "综合查询ToolStripMenuItem";
-            this.综合查询ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.综合查询ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.综合查询ToolStripMenuItem.Text = "综合查询";
             this.综合查询ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
@@ -256,7 +258,7 @@
             // 场地信息ToolStripMenuItem
             // 
             this.场地信息ToolStripMenuItem.Name = "场地信息ToolStripMenuItem";
-            this.场地信息ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.场地信息ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.场地信息ToolStripMenuItem.Text = "场地信息";
             this.场地信息ToolStripMenuItem.Visible = false;
             this.场地信息ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
@@ -264,7 +266,7 @@
             // 设备信息ToolStripMenuItem
             // 
             this.设备信息ToolStripMenuItem.Name = "设备信息ToolStripMenuItem";
-            this.设备信息ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.设备信息ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.设备信息ToolStripMenuItem.Text = "设备信息";
             this.设备信息ToolStripMenuItem.Visible = false;
             this.设备信息ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
@@ -272,14 +274,14 @@
             // 车辆信息ToolStripMenuItem
             // 
             this.车辆信息ToolStripMenuItem.Name = "车辆信息ToolStripMenuItem";
-            this.车辆信息ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.车辆信息ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.车辆信息ToolStripMenuItem.Text = "车辆信息";
             this.车辆信息ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 考试员信息ToolStripMenuItem
             // 
             this.考试员信息ToolStripMenuItem.Name = "考试员信息ToolStripMenuItem";
-            this.考试员信息ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.考试员信息ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.考试员信息ToolStripMenuItem.Text = "考试员信息";
             this.考试员信息ToolStripMenuItem.Visible = false;
             this.考试员信息ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
@@ -287,7 +289,7 @@
             // 驾校信息ToolStripMenuItem
             // 
             this.驾校信息ToolStripMenuItem.Name = "驾校信息ToolStripMenuItem";
-            this.驾校信息ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.驾校信息ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.驾校信息ToolStripMenuItem.Text = "驾校信息";
             this.驾校信息ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
@@ -448,6 +450,13 @@
             this.timer_start.Interval = 1000;
             this.timer_start.Tick += new System.EventHandler(this.timer_start_Tick);
             // 
+            // 预约计时培训ToolStripMenuItem
+            // 
+            this.预约计时培训ToolStripMenuItem.Name = "预约计时培训ToolStripMenuItem";
+            this.预约计时培训ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.预约计时培训ToolStripMenuItem.Text = "预约计时培训";
+            this.预约计时培训ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
+            // 
             // Form_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -507,7 +516,7 @@
         private System.Windows.Forms.ToolStripMenuItem 数据库连接设置ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 登录ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 学员管理ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 预约培训ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 预约计次培训ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 过程查询ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 日志查询ToolStripMenuItem;
         private System.Windows.Forms.ToolStripLabel toolStripLabel_role;
@@ -525,6 +534,7 @@
         private System.Windows.Forms.ToolStripMenuItem 考试状态ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 支付流水ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 分车叫号ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 预约计时培训ToolStripMenuItem;
     }
 }
 

@@ -269,9 +269,9 @@ create table BAS_BOOKING
   EXAMNUMBER               varchar2(12)   NOT NULL,              --学员准考证号码
   STUDENT_ID               integer        NOT NULL,              --学员信息标识符，外键于BAS_STUDENT表ID
   EXAM_REASON              varchar2(1)    DEFAULT 'A' NOT NULL,  --考试原因(字典【1007】)
-  STUDY_TIMES              integer        DEFAULT 0,             --学习时间
+  STUDY_TIME               integer        DEFAULT 0,             --学习时间，不为0表示预约计时训练，单位分钟
   BOOKING_DATETIME         varchar2(14)   NOT NULL,              --预约日期时间(格式:yyyymmddhhmmss)，hhmmss为预约时间片开始时间
-  BOOKING_TIMES            integer        DEFAULT 0,             --预约次数
+  BOOKING_TIMES            integer        DEFAULT 0,             --预约次数，计时训练固定为0
   BOOKING_EXAM_DATE        varchar2(8)    NOT NULL,              --约考日期(格式:yyyymmdd)
   DRIVER_LICENSE_TYPE      varchar2(2)    NOT NULL,              --驾驶证类型/考试车型(字典【2003】) ，考试模式下写入BAS_STUDENT.DRIVER_LICENSE_TYPE，实际使用以BAS_STUDENT.DRIVER_LICENSE_TYPE为准
   PLACE_ID                 integer       NOT NULL,              --考试地点，外键于BAS_PLACE表ID
@@ -528,7 +528,7 @@ create table BUZ_PAYMENT_DETAIL
 	STUDENT_IDNUMBER	varchar2(18)	NOT NULL,			--学员身份证明号码
 	SUBJECT				varchar2(1)		NOT NULL,			--考试科目-字典【1006】
 	FEE_TYPE			varchar2(8)		NOT NULL,			--计费类型(字典【1002】)
-	TIMES				integer			NOT NULL,			--预约次数
+	TIMES				integer			NOT NULL,			--预约次数/时间（分钟）
 	AMOUNT				number(8,2)		NOT NULL,			--金额
 	PAYMENT_WAY			varchar2(8)		NOT NULL,			--支付方式(字典【1001】WXPAY-微信支付；ALIPAY-支付宝支付；UNIONPAY-银联卡支付；OTHERPAY-其他支付)
 	BOOKING_ID			number			NOT NULL,			--预约记录，外键于BAS_BOOKING表ID
@@ -607,6 +607,7 @@ CREATE SEQUENCE SEQU_CFG_PRICING_STRATEGY_ID INCREMENT BY 1  START  WITH  1;
 create table CFG_PRICING_STRATEGY
 (
 	ID					integer			NOT NULL,			--主键
+	FEE_TYPE			varchar2(8)		NOT NULL,			--计费类型(字典【1002】)
 	PRIORITY			integer			NOT NULL,			--优先级，从0开始，0优先级最高
 	ACTION				varchar2(3)		NOT NULL,			--定价行为，(字典【1037】：set, add, sub, mul, div)
 	AMOUNT				number(8,2)		NOT NULL,			--金额

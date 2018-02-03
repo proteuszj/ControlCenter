@@ -1,4 +1,5 @@
-﻿
+﻿#define upgradeOnly
+
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Diagnostics;
@@ -13,7 +14,16 @@ namespace DBTools
         public Form_Main()
         {
             InitializeComponent();
-            Text = String.Format("{0} v{1}", ((AssemblyProductAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false)[0]).Product, Assembly.GetExecutingAssembly().GetName().Version.ToString());
+#if upgradeOnly
+            panel_restore.Visible = false;
+            button_scriptFile.Enabled = false;
+            textBox_scriptFile.Enabled = false;
+            string productName = "数据库升级工具";
+#else
+            string productName = ((AssemblyProductAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false)[0]).Product;
+#endif
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Text = String.Format("{0} v{1}", productName, version);
             folderBrowserDialog_backup.SelectedPath = Application.StartupPath;
             openFileDialog_restore.InitialDirectory = Application.StartupPath;
             openFileDialog_script.InitialDirectory = Application.StartupPath;
@@ -69,12 +79,12 @@ namespace DBTools
 
         private void button_openFile_Click(object sender, EventArgs e)
         {
-            if (button_restore==sender)
+            if (button_restore == sender)
             {
                 if (DialogResult.OK == openFileDialog_restore.ShowDialog())
                     textBox_restoreFile.Text = openFileDialog_restore.FileName;
             }
-            else if (button_scriptFile==sender )
+            else if (button_scriptFile == sender)
             {
                 if (DialogResult.OK == openFileDialog_script.ShowDialog())
                     textBox_scriptFile.Text = openFileDialog_script.FileName;
@@ -97,14 +107,17 @@ namespace DBTools
 
         private void button_run_Click(object sender, EventArgs e)
         {
-            //Process.Start("sqlplus", $"{textBox_user.Text}/{textBox_password.Text}@{textBox_SID.Text} @{textBox_scriptFile.Text}").WaitForExit();
-
+#if upgradeOnly
             FileStream fs = new FileStream(Application.StartupPath + @"\upgrade.sql", FileMode.Create);
             fs.Write(Properties.Resources.upgrade, 0, Properties.Resources.upgrade.Length);
             fs.Close();
             string param = $"{textBox_user.Text}/{textBox_password.Text}@{textBox_SID.Text} @{Application.StartupPath}\\upgrade.sql";
             Process.Start("sqlplus", param).WaitForExit();
             File.Delete(Application.StartupPath + @"\upgrade.sql");
+#else
+            if (File.Exists(textBox_scriptFile.Text))
+                Process.Start("sqlplus", $"{textBox_user.Text}/{textBox_password.Text}@{textBox_SID.Text} @{textBox_scriptFile.Text}").WaitForExit();
+#endif
         }
     }
 }

@@ -1,0 +1,10 @@
+
+delete BAS_DRIVING_SCHOOL;
+delete BAS_STUDENT;
+delete BAS_BOOKING;
+delete BUZ_EXAM_INFO;
+delete BUZ_EXAM_PROCESS;
+delete BUZ_PAYMENT_DETAIL;
+delete SYS_LOG;
+
+exit;

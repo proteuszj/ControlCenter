@@ -71,7 +71,12 @@ namespace Client
             }
             if (string.IsNullOrEmpty(terminalMAC)) terminalMAC = "00-00-00-00-00-00";
 
-            this.Text = String.Format("{0} v{1}", ((AssemblyProductAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false)[0]).Product, Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            string productName = ((AssemblyProductAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false)[0]).Product;
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+#if DEBUG
+            version += "[DEBUG]";
+#endif
+            this.Text = String.Format($"{productName} v{version}" );
             toolStripLabel_role.Text = "未登录";
         }
 
@@ -212,8 +217,7 @@ namespace Client
                         try
                         {
                             string password = Algo.DESDecrypt(iniFile.ReadValue("DBConfig", "Password"));
-                            mDBM.Open("User Id=" + userName + ";Password=" + password + ";"
-                                + "Data Source=" + DBAddress + "/" + DBName + "; Pooling=false;");
+                            mDBM.Open($"User Id={userName};Password={password};Data Source={DBAddress}/{DBName};Min Pool Size=0; Connection Timeout=5");
                         }
                         catch (Exception ex)
                         {
@@ -376,11 +380,10 @@ namespace Client
                 }
             }
         }
-        private void showSubForm(Type tt)
+        private Form getSubForm(Type tt)
         {
-            if (!tt.IsSubclassOf(typeof(Form))) return;
-
-            if (tt.IsInstanceOfType(subForm)) return;
+            //if (!tt.IsSubclassOf(typeof(Form))) return null;
+            //if (tt.IsInstanceOfType(subForm)) return null;
 
             if (subForm != null && !subForm.IsDisposed && !(subForm is Form_CarAllocation))
             {
@@ -399,7 +402,7 @@ namespace Client
                 if (subForm is Form_CarAllocation)
                     __Form_CarAllocation = (Form_CarAllocation)subForm;
             }
-            subForm.Show();
+            return subForm;
         }
 
         private void ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -444,53 +447,62 @@ namespace Client
                         Dispose();
                         Application.Exit();
                         break;
-                    case "预约培训ToolStripMenuItem":
-                        showSubForm(typeof(Form_TrainBooking));
+                    case "预约计次培训ToolStripMenuItem":
+                        getSubForm(typeof(Form_TrainBooking));
+                        ((Form_TrainBooking)subForm).TrainingMode = Form_TrainBooking.TrainingModeEnum.ByTimes;
+                        subForm.Text = "预约计次培训";
+                        subForm.Show();
+                        break;
+                    case "预约计时培训ToolStripMenuItem":
+                        getSubForm(typeof(Form_TrainBooking));
+                        ((Form_TrainBooking)subForm).TrainingMode = Form_TrainBooking.TrainingModeEnum.ByTime;
+                        subForm.Text = "预约计时培训";
+                        subForm.Show();
                         break;
                     case "支付流水ToolStripMenuItem":
-                        showSubForm(typeof(Form_PaymentDetail));
+                        getSubForm(typeof(Form_PaymentDetail)).Show();
                         break;
                     case "分车叫号ToolStripMenuItem":
-                        showSubForm(typeof(Form_CarAllocation));
+                        getSubForm(typeof(Form_CarAllocation)).Show();
                         break;
                     case "过程查询ToolStripMenuItem":
-                        showSubForm(typeof(Form_Process));
+                        getSubForm(typeof(Form_Process)).Show();
                         break;
                     case "预约及签到ToolStripMenuItem":
-                        showSubForm(typeof(Form_Booking));
+                        getSubForm(typeof(Form_Booking)).Show();
                         break;
                     case "分组及分车ToolStripMenuItem":
-                        showSubForm(typeof(Form_Grouping));
+                        getSubForm(typeof(Form_Grouping)).Show();
                         break;
                     case "考试状态ToolStripMenuItem":
-                        showSubForm(typeof(Form_ExamStatus));
+                        getSubForm(typeof(Form_ExamStatus)).Show();
                         break;
                     case "成绩打印ToolStripMenuItem":
-                        showSubForm(typeof(Form_StudentExam));
+                        getSubForm(typeof(Form_StudentExam)).Show();
                         break;
                     case "综合统计ToolStripMenuItem":
-                        showSubForm(typeof(Form_SummaryStatistices));
+                        getSubForm(typeof(Form_SummaryStatistices)).Show();
                         break;
                     case "综合查询ToolStripMenuItem":
-                        showSubForm(typeof(Form_SummaryQuery));
+                        getSubForm(typeof(Form_SummaryQuery)).Show();
                         break;
                     case "场地信息ToolStripMenuItem":
-                        showSubForm(typeof(Form_PlaceInfo));
+                        getSubForm(typeof(Form_PlaceInfo)).Show();
                         break;
                     case "设备信息ToolStripMenuItem":
-                        showSubForm(typeof(Form_DeviceInfo));
+                        getSubForm(typeof(Form_DeviceInfo)).Show();
                         break;
                     case "车辆信息ToolStripMenuItem":
-                        showSubForm(typeof(Form_CarInfo));
+                        getSubForm(typeof(Form_CarInfo)).Show();
                         break;
                     case "考试员信息ToolStripMenuItem":
-                        showSubForm(typeof(Form_ExaminerInfo));
+                        getSubForm(typeof(Form_ExaminerInfo)).Show();
                         break;
                     case "驾校信息ToolStripMenuItem":
-                        showSubForm(typeof(Form_SchoolInfo));
+                        getSubForm(typeof(Form_SchoolInfo)).Show();
                         break;
                     case "支付定价ToolStripMenuItem":
-                        showSubForm(typeof(Form_PricingStrategy));
+                        getSubForm(typeof(Form_PricingStrategy)).Show();
                         break;
                     case "数据库连接设置ToolStripMenuItem":
                         if (form_DBConfig == null || form_DBConfig.IsDisposed)
@@ -501,16 +513,16 @@ namespace Client
                         new Form_Config().ShowDialog();
                         break;
                     case "用户管理ToolStripMenuItem":
-                        showSubForm(typeof(Form_User));
+                        getSubForm(typeof(Form_User)).Show();
                         break;
                     case "权限管理ToolStripMenuItem":
-                        showSubForm(typeof(Form_Permission));
+                        getSubForm(typeof(Form_Permission)).Show();
                         break;
                     case "日志查询ToolStripMenuItem":
-                        showSubForm(typeof(Form_LogQuery));
+                        getSubForm(typeof(Form_LogQuery)).Show();
                         break;
                     case "审计查询ToolStripMenuItem":
-                        showSubForm(typeof(Form_Audit));
+                        getSubForm(typeof(Form_Audit)).Show();
                         break;
                     case "操作说明ToolStripMenuItem":
                         if (form_help == null || form_help.IsDisposed)

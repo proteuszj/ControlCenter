@@ -1,4 +1,4 @@
-﻿
+﻿#pragma warning disable 414,162
 using System;
 using System.Collections.Generic;
 using System.Drawing;

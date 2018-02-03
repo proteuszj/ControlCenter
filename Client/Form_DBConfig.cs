@@ -60,8 +60,7 @@ namespace Client
 
             try
             {
-                DBMTest.Open("User Id=" + textBox_userName.Text + ";Password=" + textBox_password.Text + ";"
-                    + "Data Source=" + textBox_DBAddress.Text + "/" + textBox_DBName.Text + "; Pooling=false;");
+                DBMTest.Open($"User Id={textBox_userName.Text};Password={textBox_password.Text};Data Source={textBox_DBAddress.Text}/{textBox_DBName.Text};Pooling=false;Connection Timeout=5");
             }
             catch (Exception ex)
             {

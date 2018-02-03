@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.btn_book = new System.Windows.Forms.Button();
             this.textBox_name = new System.Windows.Forms.TextBox();
             this.comboBox_gender = new System.Windows.Forms.ComboBox();
@@ -44,7 +44,7 @@
             this.comboBox_paymentWay = new System.Windows.Forms.ComboBox();
             this.label_paymentWay = new System.Windows.Forms.Label();
             this.textBox_times = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
+            this.label_times = new System.Windows.Forms.Label();
             this.comboBox_subjectName = new System.Windows.Forms.ComboBox();
             this.label_subject = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -76,10 +76,11 @@
             // 
             // btn_book
             // 
-            this.btn_book.Location = new System.Drawing.Point(326, 60);
+            this.btn_book.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_book.Location = new System.Drawing.Point(366, 60);
             this.btn_book.Name = "btn_book";
             this.btn_book.Size = new System.Drawing.Size(75, 23);
-            this.btn_book.TabIndex = 14;
+            this.btn_book.TabIndex = 16;
             this.btn_book.Text = "预约";
             this.btn_book.UseVisualStyleBackColor = true;
             this.btn_book.Click += new System.EventHandler(this.btn_book_Click);
@@ -133,7 +134,7 @@
             this.textBox_idNumber.Location = new System.Drawing.Point(389, 6);
             this.textBox_idNumber.MaxLength = 18;
             this.textBox_idNumber.Name = "textBox_idNumber";
-            this.textBox_idNumber.Size = new System.Drawing.Size(118, 21);
+            this.textBox_idNumber.Size = new System.Drawing.Size(75, 21);
             this.textBox_idNumber.TabIndex = 5;
             // 
             // comboBox_driverLicenseType
@@ -169,7 +170,7 @@
             this.comboBox_schoolName.FormattingEnabled = true;
             this.comboBox_schoolName.Location = new System.Drawing.Point(365, 33);
             this.comboBox_schoolName.Name = "comboBox_schoolName";
-            this.comboBox_schoolName.Size = new System.Drawing.Size(142, 20);
+            this.comboBox_schoolName.Size = new System.Drawing.Size(99, 20);
             this.comboBox_schoolName.TabIndex = 11;
             // 
             // button_search
@@ -186,35 +187,36 @@
             // 
             this.comboBox_paymentWay.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_paymentWay.FormattingEnabled = true;
-            this.comboBox_paymentWay.Location = new System.Drawing.Point(216, 7);
+            this.comboBox_paymentWay.Location = new System.Drawing.Point(220, 7);
             this.comboBox_paymentWay.Name = "comboBox_paymentWay";
             this.comboBox_paymentWay.Size = new System.Drawing.Size(71, 20);
-            this.comboBox_paymentWay.TabIndex = 3;
+            this.comboBox_paymentWay.TabIndex = 5;
             // 
             // label_paymentWay
             // 
             this.label_paymentWay.AutoSize = true;
-            this.label_paymentWay.Location = new System.Drawing.Point(145, 9);
+            this.label_paymentWay.Location = new System.Drawing.Point(148, 10);
             this.label_paymentWay.Name = "label_paymentWay";
             this.label_paymentWay.Size = new System.Drawing.Size(65, 12);
-            this.label_paymentWay.TabIndex = 2;
+            this.label_paymentWay.TabIndex = 4;
             this.label_paymentWay.Text = "支付方式：";
             // 
             // textBox_times
             // 
-            this.textBox_times.Location = new System.Drawing.Point(338, 6);
+            this.textBox_times.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_times.Location = new System.Drawing.Point(382, 6);
             this.textBox_times.Name = "textBox_times";
-            this.textBox_times.Size = new System.Drawing.Size(63, 21);
-            this.textBox_times.TabIndex = 5;
+            this.textBox_times.Size = new System.Drawing.Size(59, 21);
+            this.textBox_times.TabIndex = 7;
             // 
-            // label7
+            // label_times
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(291, 9);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(41, 12);
-            this.label7.TabIndex = 4;
-            this.label7.Text = "次数：";
+            this.label_times.AutoSize = true;
+            this.label_times.Location = new System.Drawing.Point(297, 10);
+            this.label_times.Name = "label_times";
+            this.label_times.Size = new System.Drawing.Size(41, 12);
+            this.label_times.TabIndex = 6;
+            this.label_times.Text = "次数：";
             // 
             // comboBox_subjectName
             // 
@@ -228,7 +230,7 @@
             // label_subject
             // 
             this.label_subject.AutoSize = true;
-            this.label_subject.Location = new System.Drawing.Point(6, 9);
+            this.label_subject.Location = new System.Drawing.Point(6, 10);
             this.label_subject.Name = "label_subject";
             this.label_subject.Size = new System.Drawing.Size(65, 12);
             this.label_subject.TabIndex = 0;
@@ -250,11 +252,11 @@
             this.tabControl2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl2.Controls.Add(this.tabPage2);
             this.tabControl2.Enabled = false;
-            this.tabControl2.Location = new System.Drawing.Point(526, 12);
+            this.tabControl2.Location = new System.Drawing.Point(487, 12);
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.SelectedIndex = 0;
-            this.tabControl2.Size = new System.Drawing.Size(416, 118);
-            this.tabControl2.TabIndex = 1;
+            this.tabControl2.Size = new System.Drawing.Size(455, 118);
+            this.tabControl2.TabIndex = 0;
             // 
             // tabPage2
             // 
@@ -273,20 +275,21 @@
             this.tabPage2.Controls.Add(this.label_paymentWay);
             this.tabPage2.Controls.Add(this.label_subject);
             this.tabPage2.Controls.Add(this.comboBox_subjectName);
-            this.tabPage2.Controls.Add(this.label7);
+            this.tabPage2.Controls.Add(this.label_times);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(408, 92);
+            this.tabPage2.Size = new System.Drawing.Size(447, 92);
             this.tabPage2.TabIndex = 0;
             this.tabPage2.Text = "预约";
             // 
             // button_bookingStatus
             // 
-            this.button_bookingStatus.Location = new System.Drawing.Point(326, 31);
+            this.button_bookingStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_bookingStatus.Location = new System.Drawing.Point(366, 31);
             this.button_bookingStatus.Name = "button_bookingStatus";
             this.button_bookingStatus.Size = new System.Drawing.Size(75, 23);
-            this.button_bookingStatus.TabIndex = 10;
+            this.button_bookingStatus.TabIndex = 12;
             this.button_bookingStatus.Text = "预约状态";
             this.button_bookingStatus.UseVisualStyleBackColor = true;
             this.button_bookingStatus.Click += new System.EventHandler(this.button_bookingStatus_Click);
@@ -298,7 +301,7 @@
             this.comboBox_car.Location = new System.Drawing.Point(162, 62);
             this.comboBox_car.Name = "comboBox_car";
             this.comboBox_car.Size = new System.Drawing.Size(80, 20);
-            this.comboBox_car.TabIndex = 13;
+            this.comboBox_car.TabIndex = 15;
             // 
             // radioButton_specifiedCar
             // 
@@ -306,7 +309,7 @@
             this.radioButton_specifiedCar.Location = new System.Drawing.Point(85, 63);
             this.radioButton_specifiedCar.Name = "radioButton_specifiedCar";
             this.radioButton_specifiedCar.Size = new System.Drawing.Size(71, 16);
-            this.radioButton_specifiedCar.TabIndex = 12;
+            this.radioButton_specifiedCar.TabIndex = 14;
             this.radioButton_specifiedCar.Text = "指定车辆";
             this.radioButton_specifiedCar.UseVisualStyleBackColor = true;
             this.radioButton_specifiedCar.CheckedChanged += new System.EventHandler(this.radioButton_specifiedCar_CheckedChanged);
@@ -318,19 +321,21 @@
             this.radioButton_randomCar.Location = new System.Drawing.Point(8, 63);
             this.radioButton_randomCar.Name = "radioButton_randomCar";
             this.radioButton_randomCar.Size = new System.Drawing.Size(71, 16);
-            this.radioButton_randomCar.TabIndex = 11;
+            this.radioButton_randomCar.TabIndex = 13;
             this.radioButton_randomCar.TabStop = true;
             this.radioButton_randomCar.Text = "随机分车";
             this.radioButton_randomCar.UseVisualStyleBackColor = true;
             // 
             // comboBox_bookingTime
             // 
+            this.comboBox_bookingTime.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_bookingTime.FormattingEnabled = true;
             this.comboBox_bookingTime.Location = new System.Drawing.Point(242, 32);
             this.comboBox_bookingTime.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_bookingTime.Name = "comboBox_bookingTime";
-            this.comboBox_bookingTime.Size = new System.Drawing.Size(79, 20);
-            this.comboBox_bookingTime.TabIndex = 9;
+            this.comboBox_bookingTime.Size = new System.Drawing.Size(119, 20);
+            this.comboBox_bookingTime.TabIndex = 11;
             // 
             // label_bookingTime
             // 
@@ -339,7 +344,7 @@
             this.label_bookingTime.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_bookingTime.Name = "label_bookingTime";
             this.label_bookingTime.Size = new System.Drawing.Size(77, 12);
-            this.label_bookingTime.TabIndex = 8;
+            this.label_bookingTime.TabIndex = 10;
             this.label_bookingTime.Text = "预约时间段：";
             // 
             // dateTimePicker_bookingDate
@@ -349,7 +354,7 @@
             this.dateTimePicker_bookingDate.Location = new System.Drawing.Point(77, 32);
             this.dateTimePicker_bookingDate.Name = "dateTimePicker_bookingDate";
             this.dateTimePicker_bookingDate.Size = new System.Drawing.Size(79, 21);
-            this.dateTimePicker_bookingDate.TabIndex = 7;
+            this.dateTimePicker_bookingDate.TabIndex = 9;
             this.dateTimePicker_bookingDate.ValueChanged += new System.EventHandler(this.dateTimePicker_bookingDate_ValueChanged);
             // 
             // label_bookingDate
@@ -358,7 +363,7 @@
             this.label_bookingDate.Location = new System.Drawing.Point(6, 36);
             this.label_bookingDate.Name = "label_bookingDate";
             this.label_bookingDate.Size = new System.Drawing.Size(65, 12);
-            this.label_bookingDate.TabIndex = 6;
+            this.label_bookingDate.TabIndex = 8;
             this.label_bookingDate.Text = "预约日期：";
             // 
             // tabControl1
@@ -369,7 +374,7 @@
             this.tabControl1.Location = new System.Drawing.Point(3, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(521, 118);
+            this.tabControl1.Size = new System.Drawing.Size(478, 118);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -392,7 +397,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(513, 92);
+            this.tabPage1.Size = new System.Drawing.Size(470, 92);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "学员检索";
             // 
@@ -429,14 +434,14 @@
             this.dataGridView_student.AllowUserToDeleteRows = false;
             this.dataGridView_student.AllowUserToResizeRows = false;
             this.dataGridView_student.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView_student.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridView_student.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridView_student.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView_student.EnableHeadersVisualStyles = false;
             this.dataGridView_student.Location = new System.Drawing.Point(3, 17);
@@ -471,6 +476,7 @@
             this.Controls.Add(this.groupBox1);
             this.Name = "Form_TrainBooking";
             this.Text = "预约培训";
+            this.Load += new System.EventHandler(this.Form_TrainBooking_Load);
             this.groupBox1.ResumeLayout(false);
             this.tabControl2.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
@@ -497,7 +503,7 @@
         private System.Windows.Forms.Label label_subject;
         private System.Windows.Forms.TextBox textBox_times;
         private System.Windows.Forms.ComboBox comboBox_subjectName;
-        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label_times;
         private System.Windows.Forms.ComboBox comboBox_paymentWay;
         private System.Windows.Forms.Label label_paymentWay;
         private System.Windows.Forms.Label label5;

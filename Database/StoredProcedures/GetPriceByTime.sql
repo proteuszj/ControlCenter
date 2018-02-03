@@ -1,7 +1,7 @@
-create or replace function GetPriceByTimes
+create or replace function GetPriceByTime
 (
 	message out varchar2,
-	times in integer,
+	studyTime in integer,
 	startTime in varchar2,
 	schoolName in varchar2,
 	studentIDNumber in varchar2
@@ -42,7 +42,7 @@ begin
     open cur for select *
 		from CFG_PRICING_STRATEGY
 		where
-			FEE_TYPE='COUNT' and
+			FEE_TYPE='HOUR' and
 			(EFFECTIVE_DATE is null or EFFECTIVE_DATE<=substr(realStartTime, 1, 8)) and
 			(EXPIRED_DATE is null or substr(realStartTime, 1, 8)<=EXPIRED_DATE) and
 			(START_DATE is null or START_DATE<=substr(realStartTime, 1, 8)) and
@@ -93,7 +93,7 @@ begin
 		
 		if flag then
 			case cur_rec.ACTION
-				when 'set' then totalAmount:=cur_rec.AMOUNT*times;
+				when 'set' then totalAmount:=cur_rec.AMOUNT*studyTime/60;
 				when 'add' then totalAmount:=totalAmount+cur_rec.AMOUNT;
 				when 'sub' then totalAmount:=totalAmount-cur_rec.AMOUNT;
 				when 'mul' then totalAmount:=totalAmount*cur_rec.AMOUNT;
@@ -102,7 +102,7 @@ begin
 			end case;
 			currentPriority:=cur_rec.PRIORITY;
 			if length(message)>0 then message:=message||';'||chr(13)||chr(10); end if;
-			message:=message||'COUNT, '||'priority: '||cur_rec.PRIORITY||' '||cur_rec.ACTION||' '||cur_rec.AMOUNT
+			message:=message||'HOUR, '||'priority: '||cur_rec.PRIORITY||' '||cur_rec.ACTION||' '||cur_rec.AMOUNT
 				||' effect on: '||case when cur_rec.EFFECTIVE_DATE is null then 'now' else cur_rec.EFFECTIVE_DATE end
 				||' to '||case when cur_rec.EXPIRED_DATE is null then 'forever' else cur_rec.EXPIRED_DATE end||' '
 				||case when cur_rec.REFERENCE_METHOD1 is null then '' else ' when '||cur_rec.REFERENCE_METHOD1||cur_rec.REFERENCE_AMOUNT1||case when cur_rec.REFERENCE_METHOD2 is null then '' else cur_rec.REFERENCE_RELATION||cur_rec.REFERENCE_METHOD2||cur_rec.REFERENCE_AMOUNT2 end end
@@ -115,5 +115,5 @@ begin
 		end if;
 	end loop;
 	return totalAmount;
-end GetPriceByTimes;
+end GetPriceByTime;
 /

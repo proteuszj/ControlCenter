@@ -55,7 +55,7 @@
             this.openFileDialog_restore = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog_backup = new System.Windows.Forms.FolderBrowserDialog();
             this.panel_backupRestore = new System.Windows.Forms.Panel();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel_script = new System.Windows.Forms.Panel();
             this.button_run = new System.Windows.Forms.Button();
             this.textBox_scriptFile = new System.Windows.Forms.TextBox();
             this.button_scriptFile = new System.Windows.Forms.Button();
@@ -64,7 +64,7 @@
             this.panel_backup.SuspendLayout();
             this.panel_restore.SuspendLayout();
             this.panel_backupRestore.SuspendLayout();
-            this.panel1.SuspendLayout();
+            this.panel_script.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel_connection
@@ -298,7 +298,6 @@
             this.panel_restore.Name = "panel_restore";
             this.panel_restore.Size = new System.Drawing.Size(550, 32);
             this.panel_restore.TabIndex = 2;
-            this.panel_restore.Visible = false;
             // 
             // button_restore
             // 
@@ -343,7 +342,7 @@
             // 
             // panel_backupRestore
             // 
-            this.panel_backupRestore.Controls.Add(this.panel1);
+            this.panel_backupRestore.Controls.Add(this.panel_script);
             this.panel_backupRestore.Controls.Add(this.panel_backup);
             this.panel_backupRestore.Controls.Add(this.panel_restore);
             this.panel_backupRestore.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -353,17 +352,17 @@
             this.panel_backupRestore.Size = new System.Drawing.Size(555, 149);
             this.panel_backupRestore.TabIndex = 1;
             // 
-            // panel1
+            // panel_script
             // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.panel_script.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel1.Controls.Add(this.button_run);
-            this.panel1.Controls.Add(this.textBox_scriptFile);
-            this.panel1.Controls.Add(this.button_scriptFile);
-            this.panel1.Location = new System.Drawing.Point(3, 114);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(550, 32);
-            this.panel1.TabIndex = 3;
+            this.panel_script.Controls.Add(this.button_run);
+            this.panel_script.Controls.Add(this.textBox_scriptFile);
+            this.panel_script.Controls.Add(this.button_scriptFile);
+            this.panel_script.Location = new System.Drawing.Point(3, 114);
+            this.panel_script.Name = "panel_script";
+            this.panel_script.Size = new System.Drawing.Size(550, 32);
+            this.panel_script.TabIndex = 3;
             // 
             // button_run
             // 
@@ -380,7 +379,6 @@
             // 
             this.textBox_scriptFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_scriptFile.Enabled = false;
             this.textBox_scriptFile.Location = new System.Drawing.Point(110, 5);
             this.textBox_scriptFile.Name = "textBox_scriptFile";
             this.textBox_scriptFile.Size = new System.Drawing.Size(357, 21);
@@ -389,7 +387,6 @@
             // 
             // button_scriptFile
             // 
-            this.button_scriptFile.Enabled = false;
             this.button_scriptFile.Location = new System.Drawing.Point(3, 3);
             this.button_scriptFile.Name = "button_scriptFile";
             this.button_scriptFile.Size = new System.Drawing.Size(103, 23);
@@ -422,8 +419,8 @@
             this.panel_restore.ResumeLayout(false);
             this.panel_restore.PerformLayout();
             this.panel_backupRestore.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this.panel_script.ResumeLayout(false);
+            this.panel_script.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -457,7 +454,7 @@
         private System.Windows.Forms.TextBox textBox_address;
         private System.Windows.Forms.Label label_address;
         private System.Windows.Forms.Panel panel_backupRestore;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel_script;
         private System.Windows.Forms.Button button_run;
         private System.Windows.Forms.TextBox textBox_scriptFile;
         private System.Windows.Forms.Button button_scriptFile;

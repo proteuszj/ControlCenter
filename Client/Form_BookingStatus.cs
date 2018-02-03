@@ -19,20 +19,35 @@ namespace Client
                 dataGridView_status.Columns.Add($"column{i}", (DateTime.Now + TimeSpan.FromDays(i)).ToString("yyyy-MM-dd"));
                 dataGridView_status.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
             }
+#if simpleBookingTime
+            string sql = "select distinct(case when substr(DISPLAY_NAME,1,2)<12 then '上午' else '下午' end) from CFG_PARAM where PARAM_NAME like '__0000' and PARAM_VALUE='TRUE'";
+#else
             string sql = "select DISPLAY_NAME from CFG_PARAM where PARAM_NAME like '__0000' and PARAM_VALUE='TRUE'";
+#endif
             string[] names = mDBM.SelectArray(sql);
-            dataGridView_status.Rows.Add(names.Length);
-            for (int i = 0; i < names.Length; i++)
-                dataGridView_status.Rows[i].HeaderCell.Value = names[i];
-            for (int i = 0; i < Convert.ToByte(ConfigParameters.getValue("BOOKING_DATE_LIMIT")); i++)
+            if (names.Length > 0)
             {
-                string dateString = (DateTime.Now + TimeSpan.FromDays(i)).ToString("yyyyMMdd");
+                dataGridView_status.Rows.Add(names.Length);
+                for (int i = 0; i < names.Length; i++)
+                    dataGridView_status.Rows[i].HeaderCell.Value = names[i];
+                for (int i = 0; i < Convert.ToByte(ConfigParameters.getValue("BOOKING_DATE_LIMIT")); i++)
+                {
+                    string dateString = (DateTime.Now + TimeSpan.FromDays(i)).ToString("yyyyMMdd");
+#if simpleBookingTime
+                    sql = $"select sum(booking_times) from (select distinct(case when substr(DISPLAY_NAME,1,2)<12 then '上午' else '下午' end) bookingTimePiece from cfg_param where param_name like '__0000' and param_value='TRUE') a left join bas_booking on case when substr(bas_booking.booking_datetime,9,2)<12 then '上午' else '下午' end =a.bookingTimePiece and substr(bas_booking.booking_datetime,1,8)={dateString} group by a.bookingTimePiece order by a.bookingTimePiece";
+#else
                 sql = $"select sum(booking_times) from (select param_name from cfg_param where param_name like '__0000' and param_value='TRUE') a left join bas_booking on substr(bas_booking.booking_datetime,9,6)=a.param_name and substr(bas_booking.booking_datetime,1,8)={dateString} group by a.param_name order by a.param_name";
-                string[] values = mDBM.SelectArray(sql);
-                for (int j = 0; j < names.Length; j++)
+#endif
+                    string[] values = mDBM.SelectArray(sql);
+                    for (int j = 0; j < names.Length; j++)
+#if simpleBookingTime
+                        if (i == 0 && ("上午" == dataGridView_status.Rows[j].HeaderCell.Value.ToString()) && (Convert.ToByte(DateTime.Now.ToString("hh")) >= 12))
+#else
                     if (i == 0 && Convert.ToDateTime(dataGridView_status.Rows[j].HeaderCell.Value) < DateTime.Now.ToLocalTime())
-                        dataGridView_status.Rows[j].Cells[i].Style.BackColor = dataGridView_status.Rows[j].Cells[i].Style.SelectionBackColor = Color.LightGray;
-                    else dataGridView_status.Rows[j].Cells[i].Value = values[j];
+#endif
+                            dataGridView_status.Rows[j].Cells[i].Style.BackColor = dataGridView_status.Rows[j].Cells[i].Style.SelectionBackColor = Color.LightGray;
+                        else dataGridView_status.Rows[j].Cells[i].Value = values[j];
+                }
             }
         }
 
@@ -58,7 +73,11 @@ namespace Client
         private void dataGridView_status_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex < 0 || e.RowIndex < 0) return;
+#if simpleBookingTime
+            if (0 == e.ColumnIndex && ("上午" == dataGridView_status.Rows[e.RowIndex].HeaderCell.Value.ToString()) && (Convert.ToByte(DateTime.Now.ToString("hh")) >= 12))
+#else
             if (0 == e.ColumnIndex && Convert.ToDateTime(dataGridView_status.Rows[e.RowIndex].HeaderCell.Value) < DateTime.Now.ToLocalTime())
+#endif
             {
                 button_ok.Enabled = false;
                 return;

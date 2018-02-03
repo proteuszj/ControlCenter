@@ -73,10 +73,12 @@ namespace Client
 
             string productName = ((AssemblyProductAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false)[0]).Product;
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            string fileVersion = ((AssemblyFileVersionAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyFileVersionAttribute), false)[0]).Version;
+
+            this.Text = String.Format($"{productName} v{version} - {fileVersion}" );
 #if DEBUG
-            version += "[DEBUG]";
+            this.Text += "[DEBUG]";
 #endif
-            this.Text = String.Format($"{productName} v{version}" );
             toolStripLabel_role.Text = "未登录";
         }
 

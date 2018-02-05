@@ -417,7 +417,7 @@ namespace Client
                         int result = LoginBox(out LoginName, out RoleName);
                         if (result == 1)
                         {
-                            toolStripLabel_role.Text = $"【用户】: {LoginName}, 【角色】: {RoleName}，【MAC】：{terminalMAC}，【IP】：{terminalIP}";
+                            toolStripLabel_role.Text = $"【DB Server】: {mDBM.conn.DataSource.Substring(0, mDBM.conn.DataSource.IndexOf(':'))}, 【用户】: {LoginName}, 【角色】: {RoleName}，【MAC】：{terminalMAC}，【IP】：{terminalIP}";
                             LoginPermissionProcess(RoleName);
                         }
                         else if (result == 0)

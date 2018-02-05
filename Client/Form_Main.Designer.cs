@@ -38,6 +38,7 @@
             this.退出ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.学员管理ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.预约计次培训ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.预约计时培训ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.支付流水ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.分车叫号ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.过程查询ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -77,7 +78,6 @@
             this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.timer_op = new System.Windows.Forms.Timer(this.components);
             this.timer_start = new System.Windows.Forms.Timer(this.components);
-            this.预约计时培训ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.SuspendLayout();
@@ -115,28 +115,28 @@
             // 登录ToolStripMenuItem
             // 
             this.登录ToolStripMenuItem.Name = "登录ToolStripMenuItem";
-            this.登录ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.登录ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.登录ToolStripMenuItem.Text = "登录";
             this.登录ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 密码修改ToolStripMenuItem
             // 
             this.密码修改ToolStripMenuItem.Name = "密码修改ToolStripMenuItem";
-            this.密码修改ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.密码修改ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.密码修改ToolStripMenuItem.Text = "密码修改";
             this.密码修改ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 注销ToolStripMenuItem
             // 
             this.注销ToolStripMenuItem.Name = "注销ToolStripMenuItem";
-            this.注销ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.注销ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.注销ToolStripMenuItem.Text = "注销";
             this.注销ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 退出ToolStripMenuItem
             // 
             this.退出ToolStripMenuItem.Name = "退出ToolStripMenuItem";
-            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.退出ToolStripMenuItem.Text = "退出";
             this.退出ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
@@ -155,28 +155,35 @@
             // 预约计次培训ToolStripMenuItem
             // 
             this.预约计次培训ToolStripMenuItem.Name = "预约计次培训ToolStripMenuItem";
-            this.预约计次培训ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.预约计次培训ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.预约计次培训ToolStripMenuItem.Text = "预约计次培训";
             this.预约计次培训ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
+            // 
+            // 预约计时培训ToolStripMenuItem
+            // 
+            this.预约计时培训ToolStripMenuItem.Name = "预约计时培训ToolStripMenuItem";
+            this.预约计时培训ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.预约计时培训ToolStripMenuItem.Text = "预约计时培训";
+            this.预约计时培训ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 支付流水ToolStripMenuItem
             // 
             this.支付流水ToolStripMenuItem.Name = "支付流水ToolStripMenuItem";
-            this.支付流水ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.支付流水ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.支付流水ToolStripMenuItem.Text = "支付流水";
             this.支付流水ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 分车叫号ToolStripMenuItem
             // 
             this.分车叫号ToolStripMenuItem.Name = "分车叫号ToolStripMenuItem";
-            this.分车叫号ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.分车叫号ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.分车叫号ToolStripMenuItem.Text = "分车叫号";
             this.分车叫号ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // 过程查询ToolStripMenuItem
             // 
             this.过程查询ToolStripMenuItem.Name = "过程查询ToolStripMenuItem";
-            this.过程查询ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.过程查询ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.过程查询ToolStripMenuItem.Text = "过程查询";
             this.过程查询ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
@@ -449,13 +456,6 @@
             // 
             this.timer_start.Interval = 1000;
             this.timer_start.Tick += new System.EventHandler(this.timer_start_Tick);
-            // 
-            // 预约计时培训ToolStripMenuItem
-            // 
-            this.预约计时培训ToolStripMenuItem.Name = "预约计时培训ToolStripMenuItem";
-            this.预约计时培训ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.预约计时培训ToolStripMenuItem.Text = "预约计时培训";
-            this.预约计时培训ToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItem_Click);
             // 
             // Form_Main
             // 

@@ -1,10 +1,9 @@
-﻿
+﻿#define CAR_ALLOCATION_BROADCAST
 using System;
 using System.Data;
 using System.Drawing;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 using static Client.DBM;
@@ -46,7 +45,6 @@ namespace Client
         static readonly string __UnusedBooking = "select * from bas_booking where BOOKING_EXAM_DATE=to_char(current_date, 'yyyymmdd') and STUDENT_ID=(select ID from bas_student where IDNUMBER='{0}') and not exists(select * from buz_exam_info where BOOKING_ID=bas_booking.ID)";
 
         TcpClient __TcpClient;
-        Mutex __Mutex = new Mutex();
 
         public Form_CarAllocation()
         {
@@ -206,7 +204,9 @@ namespace Client
                 if (null == __TcpClient)
                     try
                     {
+#if CAR_ALLOCATION_BROADCAST
                         __TcpClient = new TcpClient(textBox_projectAddress.Text, int.Parse(textBox_projectPort.Text));
+#endif
                     }
                     catch (Exception ex)
                     {
@@ -247,7 +247,7 @@ namespace Client
 
         private void timer_allocate_Tick(object sender, EventArgs e)
         {
-            __Mutex.WaitOne();
+            mDBM.DBMutex.WaitOne();
             int index, calledIndex;
             if (dataGridView_student.RowCount > 0)
             {
@@ -406,15 +406,15 @@ namespace Client
                 //fs.Close();
 
             }
-            __Mutex.ReleaseMutex();
+            mDBM.DBMutex.ReleaseMutex();
         }
 
         private void timer_refresh_Tick(object sender, EventArgs e)
         {
-            __Mutex.WaitOne();
+            mDBM.DBMutex.WaitOne();
             refreshCar();
             refreshStudent();
-            __Mutex.ReleaseMutex();
+            mDBM.DBMutex.ReleaseMutex();
         }
 
         void refreshCar()

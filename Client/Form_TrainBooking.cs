@@ -316,13 +316,14 @@ namespace Client
                 string bookingDatetime = dateTimePicker_bookingDate.Value.ToString("yyyyMMdd") + comboBox_bookingTime.Text.Remove(5, 1).Remove(2, 1).Substring(0, 6);
 #endif
                 string carLicensePlate = radioButton_specifiedCar.Checked ? comboBox_car.Text : string.Empty;
+                mDBM.DBMutex.WaitOne();
                 if (TrainingModeEnum.ByTimes == TrainingMode)
                     mDBM.BookFromManagement(textBox_idNumber.Text, comboBox_subjectName.Text, Convert.ToInt32(textBox_times.Text, 10),
                         amount.ToString("F2"), comboBox_paymentWay.Text, bookingDatetime, carLicensePlate, __Form_TrainBooking_confirm.cashierName, __Form_TrainBooking_confirm.cashierIDNumber, out message);
                 else
                     mDBM.BookFromManagementByTime(textBox_idNumber.Text, comboBox_subjectName.Text, Convert.ToInt32(textBox_times.Text, 10),
                         amount.ToString("F2"), comboBox_paymentWay.Text, bookingDatetime, carLicensePlate, __Form_TrainBooking_confirm.cashierName, __Form_TrainBooking_confirm.cashierIDNumber, out message);
-
+                mDBM.DBMutex.ReleaseMutex();
                 MessageBox.Show(message, "提示");
             }
 

@@ -4,6 +4,7 @@ using System;
 using System.Data;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace Client
 {
@@ -17,6 +18,8 @@ namespace Client
         public string loginName, roleName;
 
         public static DBM mDBM = new DBM();// 数据库操作管理类
+
+        public Mutex DBMutex = new Mutex();
 
         public DBM()
         {
